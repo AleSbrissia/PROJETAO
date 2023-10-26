@@ -70,7 +70,13 @@ struct lef_t *destroi_lef (struct lef_t *l) {
     return NULL ;
   }
 
-  
+  /*destroi do começo para o fim*/
+  while (aux->prox) {
+
+    aux = l->primeiro ;
+    l->primeiro = aux->prox ;
+    free(aux) ;
+  }
 
   return NULL ;
 }
@@ -92,6 +98,8 @@ int insere_lef (struct lef_t *l, struct evento_t *e) {
   if (!aux)
     return 0 ;
 
+  aux->prox = NULL ; 
+
   /*caso a lista esteja vazia*/
   if (vazia_lef(l) == 1) {
 
@@ -99,7 +107,8 @@ int insere_lef (struct lef_t *l, struct evento_t *e) {
     aux->prox = NULL ;
     return 1 ;
   }
-    
+  
+  /*seta as variaveis para o while*/
   aux->evento = e ;
   ptr = l->primeiro ;
   cont = 0 ;
@@ -189,7 +198,7 @@ void imprime_lef (struct lef_t *l) {
   printf("LEF:\n") ;
   p = l->primeiro ;
 
-  while (p) {
+  while (p && !vazia_lef(l)) {
 
     printf("tempo %d tipo %d dado1 %d dado2 %d\n", p->evento->tempo, p->evento->tipo, p->evento->dado1, p->evento->dado2) ;
     p = p->prox ;
