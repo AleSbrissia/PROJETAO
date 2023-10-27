@@ -69,12 +69,20 @@ struct lef_t *destroi_lef (struct lef_t *l) {
     free(l) ;
     return NULL ;
   }
-
+ 
+  aux = l->primeiro ;
   /*destroi do começo para o fim*/
   while (aux->prox) {
 
     aux = l->primeiro ;
+    if (!aux->prox) {
+      
+      free(aux) ;
+      break ; 
+    }
+
     l->primeiro = aux->prox ;
+    free(aux->evento) ;
     free(aux) ;
   }
 
@@ -88,7 +96,7 @@ struct lef_t *destroi_lef (struct lef_t *l) {
 */
 int insere_lef (struct lef_t *l, struct evento_t *e) {
 
-  struct nodo_lef_t *aux, *ptr, *p ;
+  struct nodo_lef_t *aux, *ptr ;
   int cont ;
 
   if (!l || !e)
@@ -97,8 +105,7 @@ int insere_lef (struct lef_t *l, struct evento_t *e) {
   aux = malloc(sizeof(struct nodo_lef_t)) ;
   if (!aux)
     return 0 ;
-
-  aux->prox = NULL ; 
+  aux->evento = e ;
 
   /*caso a lista esteja vazia*/
   if (vazia_lef(l) == 1) {
@@ -107,19 +114,28 @@ int insere_lef (struct lef_t *l, struct evento_t *e) {
     aux->prox = NULL ;
     return 1 ;
   }
-  
+ 
   /*seta as variaveis para o while*/
-  aux->evento = e ;
   ptr = l->primeiro ;
   cont = 0 ;
-  p = l->primeiro ;
 
   /*
    *aponta ptr para o nodo na posicao a ser inserida,
    *cont recebe a posicao na lef.
   */
-  while (ptr->evento->tempo < aux->evento->tempo) {
+  while (ptr->evento->tempo <= aux->evento->tempo) {
     
+    /*caso o nodo for inserido na ultima posicao*/
+    if (!ptr->prox) {
+    
+      if (ptr->evento->tempo < aux->evento->tempo) { 
+
+        ptr->prox = aux ;  
+        aux->prox = NULL ;
+        return 1 ;
+      }
+      break ;
+    }
     ptr = ptr->prox ;
     cont++ ;
   }
@@ -131,25 +147,18 @@ int insere_lef (struct lef_t *l, struct evento_t *e) {
     l->primeiro = aux ;
     return 1 ;
   }
-    
-  /* aponta p para a posicao anterior a ptr*/
+
+  ptr = l->primeiro ;  
+  /* aponta p para a posicao anterior a ser inserida*/
   while (cont -1 > 0) {
 
-    p = p->prox ;
+    ptr = ptr->prox ;
     cont-- ;
   }  
 
-  /*caso o nodo for inserido na ultima posicao*/
-  if (!ptr) {
-
-    p->prox = aux ;
-    aux->prox = NULL ;
-    return 1 ;
-  }
-
   /*insere o nodo na lef*/
-  p->prox = aux ;
-  aux->prox = ptr ;
+  aux->prox = ptr->prox ;
+  ptr->prox = aux ;
 
   return 1 ;
 }
@@ -160,7 +169,15 @@ int insere_lef (struct lef_t *l, struct evento_t *e) {
  */
 struct evento_t *retira_lef (struct lef_t *l) {
 
-  return NULL ;
+  struct evento_t *ev ;
+  struct nodo_lef_t *pn ;
+  
+  ev = l->primeiro->evento ;
+  pn = l->primeiro ;
+  l->primeiro = l->primeiro->prox ;
+  free(pn);
+
+  return ev ;
 }
 
 /* 
@@ -194,14 +211,26 @@ void imprime_lef (struct lef_t *l) {
   if (!l)
     return ;
 
-  cont = 0 ;
+  cont = 1 ;
   printf("LEF:\n") ;
+
+  /*caso a lista esteja vazia*/
+  if (vazia_lef(l)) {
+
+    printf("Total 0 eventos\n") ;
+    return ;
+  }
   p = l->primeiro ;
 
-  while (p && !vazia_lef(l)) {
+  printf("tempo %d tipo %d dado1 %d dado2 %d\n", p->evento->tempo,
+         p->evento->tipo, p->evento->dado1, p->evento->dado2) ;
 
-    printf("tempo %d tipo %d dado1 %d dado2 %d\n", p->evento->tempo, p->evento->tipo, p->evento->dado1, p->evento->dado2) ;
+  while (p && p->prox ) {
+
     p = p->prox ;
+    printf("tempo %d tipo %d dado1 %d dado2 %d\n", p->evento->tempo,
+           p->evento->tipo, p->evento->dado1, p->evento->dado2) ;
+
     cont++ ;
   }
   printf("Total %d eventos\n", cont) ;
