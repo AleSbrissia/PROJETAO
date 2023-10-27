@@ -16,10 +16,15 @@ $(MAIN).o: $(MAIN).c lef.h lista.h set.h
 lef.o:   lef.c   lef.h
 lista.o: lista.c lista.h
 set.o:   set.c   set.h
+libTB.o: libTB.c libTB.h
 
 # Teste da LEF
 testa-lef:    testa-lef.o  lef.o
 testa-lef.o:  testa-lef.c  lef.h
+
+# Teste da LibTH
+testa-libTH:   testa-libTH.o  libTH.o
+testa-libTH.o: testa-libTH.c  libTH.h
 
 clean:
 	rm -f *.o *~ $(MAIN) $(TESTES) $(ENTREGA) $(ENTREGA).tgz
