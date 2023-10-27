@@ -4,6 +4,7 @@
 // seus #includes vão aqui
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "set.h"
 #include "lista.h"
 
@@ -16,9 +17,46 @@
 #define N_BASES "N_HEROIS / 6"
 #define N_MISSOES "T_FIM_DO_MUNDO / 100"
 
-// minimize o uso de variáveis globais
+struct world_t {
 
-int
+  int NHero ;
+  struct hero_t *Hero ;
+  int NBase ;
+  struct base_t *Base ;
+  int NMiss ;
+   Miss ;
+  int NSkills ;
+  int WSize ;
+  long clock ;
+}
+
+struct base_t {
+
+  int id ;
+  int size ;
+  int party ;
+  struct lista_t *wait ;
+  int cx ;
+  int cy ;
+}
+
+struct hero_t {
+
+  int id ;
+  int Skills ;
+  int patience ;
+  int speed ;
+  int xp ;
+  int BaseId
+}
+
+
+// funções aqui
+
+int aleat(int min, int max) {
+
+  return rand() % (max - min + 1) + min; 
+}
 
 // programa principal
 int main ()
