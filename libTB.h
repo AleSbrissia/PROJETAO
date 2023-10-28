@@ -10,7 +10,7 @@
 struct world_t {
 
   int NHeroes ;
-  struct hero_t *Heros ;
+  struct hero_t *Heroes ;
   int NBases ;
   struct base_t *Bases ;
   int NMiss ;

@@ -14,9 +14,9 @@
 #define T_FIM_DO_MUNDO 525600
 #define N_TAMANHO_MUNDO 20000
 #define N_HABILIDADES 10
-#define N_HEROIS "N_HABILIDADES * 5"
-#define N_BASES "N_HEROIS / 6"
-#define N_MISSOES "T_FIM_DO_MUNDO / 100"
+#define N_HEROIS  N_HABILIDADES * 5
+#define N_BASES  N_HEROIS / 6
+#define N_MISSOES T_FIM_DO_MUNDO / 100
 
 // funções aqui
 
@@ -30,7 +30,8 @@ int main ()
   // iniciar o mundo
   w = world_create(T_INICIO, N_TAMANHO_MUNDO, N_HABILIDADES, N_HEROIS, N_BASES,
                    N_MISSOES) ;
-
+  
+  printf(" %d\n", w->NHeroes) ;
 
   // executar o laço de simulação
 
