@@ -9,20 +9,20 @@
 #include "lef.h"
 #include "libTB.h"
 
-
 int aleat(int min, int max) {
 
   return rand() % (max - min + 1) + min;
 }
 
 //funcao exclusiva deste arquivo
-int Heroes_create (struct hero_t *h, int nheroes, int nskills) {
+struct hero_t *Heroes_create (int nheroes, int nskills) {
 
-  int i ; 
-  int tam ;
+  int i, tam ;
+  struct hero_t *h ;
 
+  h = malloc(sizeof(struct hero_t) * nheroes) ;
   if (!h)
-    return 0 ;
+    return NULL ;
 
   for (i = 0; i < nheroes; i++) {
 
@@ -39,43 +39,48 @@ int Heroes_create (struct hero_t *h, int nheroes, int nskills) {
     h[i].xp = 0 ;
     //BaseId nao inicializado
   }
-  return 1 ;
+  return h ;
 }
 
 //funcao exclusiva deste arquivo
-int Bases_create (struct base_t *b, int wsize, int nbases, int nheroes) {
+struct base_t *Bases_create (int wsize, int nbases, int nheroes) {
 
   int i ;
-
+  struct base_t *b ;
+  
+  b = malloc(sizeof(struct base_t) * nbases) ;
   if (!b)
-    return 0 ;
+    return NULL ;
 
   for (i = 0; i < nbases; i++) {
 
-    b->party = set_create(nheroes) ;
-    b->cx = aleat(0, wsize -1) ;
-    b->cy = aleat(0, wsize -1) ;
-    b->wait = lista_cria() ;
+    b[i].party = set_create(nheroes) ;
+    b[i].cx = aleat(0, wsize -1) ;
+    b[i].cy = aleat(0, wsize -1) ;
+    b[i].wait = lista_cria() ;
   }
-  return 1 ; 
+  return b ; 
 }
 
 //funcao exclusiva deste arquivo
-int Miss_create (struct miss_t *m, int nmiss, int wsize) {
+//cria um vetor de struct e inicializa os conjuntos e listas
+struct miss_t *Miss_create (int nmiss, int wsize) {
 
   int i ;
+  struct miss_t *m ;
 
+  m = malloc(sizeof(struct miss_t) * nmiss) ;
   if (!m)
-    return 0 ;
+    return NULL ;
 
   for (i = 0; i < nmiss; i++) {
 
-    m->id = aleat(0, nmiss -1) ;
-    m->cx = aleat(0, wsize -1) ;
-    m->cy = aleat(0, wsize -1) ;
-    m->skills = set_create(aleat(6, 10)) ;
+    m[i].id = aleat(0, nmiss -1) ;
+    m[i].cx = aleat(0, wsize -1) ;
+    m[i].cy = aleat(0, wsize -1) ;
+    m[i].skills = set_create(aleat(6, 10)) ;
   }
-  return 1 ;
+  return m ;
 }
 
 struct world_t *world_create (long tstart, int wsize, int nskills,int nheroes,
@@ -92,16 +97,13 @@ struct world_t *world_create (long tstart, int wsize, int nskills,int nheroes,
   w->clock = tstart ;
 
   //seta os vetores 
-  w->Heroes = malloc(sizeof(struct hero_t) * nheroes) ;
-  w->Bases = malloc(sizeof(struct base_t) * nbases) ;
-  w->Miss = malloc(sizeof(struct miss_t) * nmiss) ;
 
-  Heroes_create(w->Heroes, nheroes, nskills) ;
-  Bases_create(w->Bases, wsize, nbases, nheroes) ;
-  Miss_create(w->Miss, nmiss, wsize) ;
+  w->Heroes = Heroes_create(nheroes, nskills) ;
+  w->Bases = Bases_create(wsize, nbases, nheroes) ;
+  w->Miss = Miss_create(nmiss, wsize) ;
 
   if (!w->Heroes || !w->Bases || !w->Miss)
-    return 0 ;
+    return NULL ;
   
   return w ;
 }  
