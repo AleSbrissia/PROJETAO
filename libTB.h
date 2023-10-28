@@ -58,6 +58,8 @@ int aleat(int min, int max) ;
 struct world_t *world_create (long tstart, int wsize, 
                   int nskills, int nheroes, int nbases, long nmiss) ;
 
+struct world_t *world_destroy (struct world_t *w, int nheroes,
+                               int nbases, long nmiss) ;
 
 
 

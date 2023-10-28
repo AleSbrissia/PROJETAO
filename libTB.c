@@ -19,6 +19,7 @@ int aleat(int min, int max) {
 int Heroes_create (struct hero_t *h, int nheroes, int nskills) {
 
   int i ; 
+  int tam ;
 
   if (!h)
     return 0 ;
@@ -26,8 +27,10 @@ int Heroes_create (struct hero_t *h, int nheroes, int nskills) {
   for (i = 0; i < nheroes; i++) {
 
     h[i].Skills = set_create (nskills) ;
+    tam = aleat(1, 3) ;
+
     //laço para evitar repetiçoes nas habilidades
-    while( set_card(h[i].Skills) < aleat(1, 3)) 
+    while( set_card(h[i].Skills) < tam) 
       set_add (h[i].Skills, aleat(0, 9)) ;
 
     h[i].id = i ; 
@@ -103,7 +106,53 @@ struct world_t *world_create (long tstart, int wsize, int nskills,int nheroes,
   return w ;
 }  
 
-struct world_t *world_destroy (struct world *w)
+struct world_t *world_destroy (struct world_t *w, int nheroes,
+                               int nbases, long nmiss) {
+
+  int i ;
+
+  for (i = 0; i < nheroes; i++) 
+    set_destroy (w->Heroes[i].Skills) ;
+
+  for (i = 0; i < nbases; i++) {
+
+    set_destroy (w->Bases[i].party) ;
+    lista_destroi (w->Bases[i].wait) ;
+  }
+
+  for (i = 0; i < nmiss ; i++) 
+    set_destroy (w->Miss[i].skills) ;
+  
+  free(w->Heroes) ;
+  free(w->Bases) ;
+  free(w->Miss) ;
+  free(w) ;
+
+  return NULL ;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
