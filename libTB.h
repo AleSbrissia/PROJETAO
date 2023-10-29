@@ -1,8 +1,6 @@
 // Biblioteca do projeto "The Boys - 2023"
 // Autor: Alexandre Sbrissia, GRR: 20231955
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include "set.h"
 #include "lista.h"
@@ -17,6 +15,7 @@ struct world_t {
   struct miss_t *Miss ;
   int NSkills ;
   int WSize ;
+  struct lef_t lef ;
   long clock ;
 } ;
 
@@ -55,12 +54,12 @@ int aleat(int min, int max) ;
  *Ordem das entradas igual a dos defines em theboys.c
  *com excessao de T_FIM_DO_MUNDO
 */
-struct world_t *world_create (long tstart, int wsize, 
-                  int nskills, int nheroes, int nbases, long nmiss) ;
+struct world_t *world_create (long tstart, int wsize, int nskills,
+                              int nheroes, int nbases, long nmiss) ;
 
-struct world_t *world_destroy (struct world_t *w, int nheroes,
-                               int nbases, long nmiss) ;
+struct world_t *world_destroy (struct world_t *w, long tend) ; 
 
+int world_start (struct world_t *w, long tend, int nbases) ;
 
 
 

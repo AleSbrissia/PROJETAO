@@ -9,6 +9,7 @@
 #include "lef.h"
 #include "libTB.h"
 
+
 int aleat(int min, int max) {
 
   return rand() % (max - min + 1) + min;
@@ -95,9 +96,9 @@ struct world_t *world_create (long tstart, int wsize, int nskills,int nheroes,
   w->NMiss = nmiss ;
   w->WSize = wsize ;
   w->clock = tstart ;
+  w->lef = cria_lef() ;
 
   //seta os vetores 
-
   w->Heroes = Heroes_create(nheroes, nskills) ;
   w->Bases = Bases_create(wsize, nbases, nheroes) ;
   w->Miss = Miss_create(nmiss, wsize) ;
@@ -108,15 +109,17 @@ struct world_t *world_create (long tstart, int wsize, int nskills,int nheroes,
   return w ;
 }  
 
-struct world_t *world_destroy (struct world_t *w, int nheroes,
-                               int nbases, long nmiss) {
+struct world_t *world_destroy (struct world_t *w) {
 
   int i ;
 
-  for (i = 0; i < nheroes; i++) 
+  if(!w)
+    return NULL ;
+
+  for (i = 0 ; i < w->NHeroes ; i++) 
     set_destroy (w->Heroes[i].Skills) ;
 
-  for (i = 0; i < nbases; i++) {
+  for (i = 0 ; i < w->NBases ; i++) {
 
     set_destroy (w->Bases[i].party) ;
     lista_destroi (w->Bases[i].wait) ;
@@ -124,7 +127,8 @@ struct world_t *world_destroy (struct world_t *w, int nheroes,
 
   for (i = 0; i < nmiss ; i++) 
     set_destroy (w->Miss[i].skills) ;
-  
+ 
+  destroi_lef(w->lef) ;
   free(w->Heroes) ;
   free(w->Bases) ;
   free(w->Miss) ;
@@ -132,6 +136,33 @@ struct world_t *world_destroy (struct world_t *w, int nheroes,
 
   return NULL ;
 }
+
+struct evento_t *evento_fim (struct world_t *w, long tend) {
+
+  int i ;
+  struct evento_t *ev ;
+
+  if (!w || !w->Heroes) 
+    return NULL ;
+
+  printf("%ld: FIM\n", tend) ;
+
+  for (i = 0 ; i < w->NHeroes ; i++) {
+
+    printf("HEROI %d PAC %d VEL %d EXP %d HABS", w->Heroes[i].id, 
+            w->Heroes[i].patience, w->Heroes[i].speed, w->Heroes.xp) ;
+    set_print(w->Heroes) ;
+  }  
+
+  
+
+}
+
+int world_start (struct world_t *w, long tend, int nbases) {
+
+  int i ;
+
+  for (i = 0; i < nbases; i++) {
 
 
 
