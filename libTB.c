@@ -125,19 +125,18 @@ struct world_t *world_destroy (struct world_t *w) {
     lista_destroi (w->Bases[i].wait) ;
   }
 
-  for (i = 0; i < nmiss ; i++) 
+  for (i = 0; i < w->NMiss ; i++) 
     set_destroy (w->Miss[i].skills) ;
  
   destroi_lef(w->lef) ;
   free(w->Heroes) ;
   free(w->Bases) ;
-  free(w->Miss) ;
   free(w) ;
 
   return NULL ;
 }
 
-struct evento_t *evento_fim (struct world_t *w, long tend) {
+int trata_evento_fim (struct world_t *w, long tend) {
 
   int i ;
   struct evento_t *ev ;
@@ -150,22 +149,30 @@ struct evento_t *evento_fim (struct world_t *w, long tend) {
   for (i = 0 ; i < w->NHeroes ; i++) {
 
     printf("HEROI %d PAC %d VEL %d EXP %d HABS", w->Heroes[i].id, 
-            w->Heroes[i].patience, w->Heroes[i].speed, w->Heroes.xp) ;
+            w->Heroes[i].patience, w->Heroes[i].speed, w->Heroes[i].xp) ;
     set_print(w->Heroes) ;
   }  
+  //terminar 
+  printf("%/ MISSOES CUMPRIDAS (2f), MEDIA 2f TENTATIVAS/MISSAO") ;
 
-  
+} 
 
-}
-
-int world_start (struct world_t *w, long tend, int nbases) {
+int world_start (struct world_t *w, long tend) {
 
   int i ;
+  struct evento_t *ev ;
 
-  for (i = 0; i < nbases; i++) {
+  for (i = 0; i < w->NBases; i++) {
+    
+    w->Heroes[i].BaseId = aleat(0, w->NBases) ;
+    w->Heroes[i].time = aleat(0, 4320) ;
+    ev = cria_evento(0, 1, w->Heroes[i].id, w->Heroes[i].BaseId) ;
+    insere_evento(w->lef, ev) ;
+  }
 
-
-
+  for (i = 0; i < w->NMiss; i++) {
+    
+    ev = cria_evento (w->lef, 
 
 
 
