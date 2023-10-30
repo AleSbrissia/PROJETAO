@@ -162,6 +162,9 @@ int world_start (struct world_t *w, long tend) {
   int i ;
   struct evento_t *ev ;
 
+  if (!w || !w->Heroes || !w->Miss || !w->Bases) 
+    return 0 ;
+
   for (i = 0; i < w->NBases; i++) {
     
     w->Heroes[i].BaseId = aleat(0, w->NBases) ;
@@ -172,9 +175,15 @@ int world_start (struct world_t *w, long tend) {
 
   for (i = 0; i < w->NMiss; i++) {
     
-    ev = cria_evento (w->lef, 
+    ev = cria_evento (aleat(0 , tend), 8, w->Miss[i].id, 0) ; //d2 nao precisa
+    insere_lef (w->lef, ev) ;
+  }
+  
+  ev = cria_evento (tend, 9, 0, 0) ;
+  insere_lef (w->lef, ev) ;
 
-
+  return 1 ;
+}
 
 
 

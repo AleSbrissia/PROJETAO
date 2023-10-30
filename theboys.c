@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include "set.h"
 #include "lista.h"
+#include "lef.h"
 #include "libTB.h"
 
 // seus #defines vão aqui
