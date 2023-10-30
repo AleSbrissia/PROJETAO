@@ -36,9 +36,9 @@ struct hero_t *Heroes_create (int nheroes, int nskills) {
 
     h[i].id = i ; 
     h[i].patience = aleat(0, 100) ;  
-    h[i].speed = aleat(50, 5000) ; // m/min 
+    h[i].speed = aleat(50, 5000) ; // em m/min 
     h[i].xp = 0 ;
-    //BaseId nao inicializado
+    //BaseId nao inicializado ainda
   }
   return h ;
 }
@@ -63,8 +63,8 @@ struct base_t *Bases_create (int wsize, int nbases, int nheroes) {
   return b ; 
 }
 
-//funcao exclusiva deste arquivo
-//cria um vetor de struct e inicializa os conjuntos e listas
+// funcao exclusiva deste arquivo
+// aloca um vetor de missoes e inicializa os conjuntos de habilidades
 struct miss_t *Miss_create (int nmiss, int wsize) {
 
   int i ;
@@ -136,27 +136,6 @@ struct world_t *world_destroy (struct world_t *w) {
   return NULL ;
 }
 
-int trata_evento_fim (struct world_t *w, long tend) {
-
-  int i ;
-  struct evento_t *ev ;
-
-  if (!w || !w->Heroes) 
-    return NULL ;
-
-  printf("%ld: FIM\n", tend) ;
-
-  for (i = 0 ; i < w->NHeroes ; i++) {
-
-    printf("HEROI %d PAC %d VEL %d EXP %d HABS", w->Heroes[i].id, 
-            w->Heroes[i].patience, w->Heroes[i].speed, w->Heroes[i].xp) ;
-    set_print(w->Heroes) ;
-  }  
-  //terminar 
-  printf("%/ MISSOES CUMPRIDAS (2f), MEDIA 2f TENTATIVAS/MISSAO") ;
-
-} 
-
 int world_start (struct world_t *w, long tend) {
 
   int i ;
@@ -170,7 +149,7 @@ int world_start (struct world_t *w, long tend) {
     w->Heroes[i].BaseId = aleat(0, w->NBases) ;
     w->Heroes[i].time = aleat(0, 4320) ;
     ev = cria_evento(0, 1, w->Heroes[i].id, w->Heroes[i].BaseId) ;
-    insere_evento(w->lef, ev) ;
+    insere_lef(w->lef, ev) ;
   }
 
   for (i = 0; i < w->NMiss; i++) {
@@ -185,6 +164,30 @@ int world_start (struct world_t *w, long tend) {
   return 1 ;
 }
 
+int trata_evento_fim (struct world_t *w, struct evento_t *fim) {
+
+  int i ;
+
+  if (!w || !w->Heroes) 
+    return 0 ;
+
+  printf("%ld: FIM\n", fim->tempo) ;
+
+  for (i = 0 ; i < w->NHeroes ; i++) {
+
+    printf("HEROI %d PAC %d VEL %d EXP %d HABS", w->Heroes[i].id, 
+            w->Heroes[i].patience, w->Heroes[i].speed, w->Heroes[i].xp) ;
+  
+    set_print(w->Heroes->Skills) ;
+  }  
+
+  //terminar 
+  printf("/ MISSOES CUMPRIDAS (2f), MEDIA 2f TENTATIVAS/MISSAO") ;
+
+  return 1 ;
+} 
+
+int trata_evento_chega(struct world_t *w, struct evento_t *ch) {
 
 
 

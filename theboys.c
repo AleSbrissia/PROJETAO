@@ -50,41 +50,42 @@ int main () {
 
     switch (ev->tipo) {
 
-      EV_CHEGA :
+      case EV_CHEGA :
         
+        trata_evento_chega(w, ev) ;
         break ;
 
-      EV_ESPERA :
-
-        break ;
-
-      EV_DESISTE :
+      case EV_ESPERA :
 
         break ;
 
-      EV_AVISA :
+      case EV_DESISTE :
 
         break ;
 
-      EV_ENTRA :
+      case EV_AVISA :
 
         break ;
 
-      EV_SAI :
+      case EV_ENTRA :
 
         break ;
 
-      EV_VIAJA :
+      case EV_SAI :
 
         break ;
 
-      EV_MISSAO :
+      case EV_VIAJA :
 
         break ;
 
-      EV_FIM :
+      case EV_MISSAO :
+
+        break ;
+
+      case EV_FIM :
         
-        trata_evento_fim ;
+        trata_evento_fim(w, ev) ;
         break ;
 
     }
