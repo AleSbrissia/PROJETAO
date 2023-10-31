@@ -37,10 +37,17 @@ int main () {
 
   struct world_t *w ;
   struct evento_t *ev ;
+  struct hero_t *h ;
+  struct base_t *b ;
 
   // iniciar o mundo
+  srand(0) ;
+
   w = world_create(T_INICIO, N_TAMANHO_MUNDO, N_HABILIDADES, N_HEROIS,
                    N_BASES, N_MISSOES) ;
+  world_start(w, T_FIM_DO_MUNDO) ;
+
+  imprime_lef(w->lef) ;
 
   // executar o laço de simulação
   while (w->clock <= T_FIM_DO_MUNDO) {
@@ -51,8 +58,10 @@ int main () {
     switch (ev->tipo) {
 
       case EV_CHEGA :
-        
-        trata_evento_chega(w, ev) ;
+       
+        h = &w->Heroes[ev->dado1] ;
+        b = &w->Bases[ev->dado2] ;
+        trata_evento_chega(w, h, b) ;
         break ;
 
       case EV_ESPERA :
@@ -85,7 +94,7 @@ int main () {
 
       case EV_FIM :
         
-        trata_evento_fim(w, ev) ;
+        trata_evento_fim(w, w->clock) ;
         break ;
 
     }
