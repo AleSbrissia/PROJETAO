@@ -42,7 +42,7 @@ struct world_t {
   int NSkills ;
   int WSize ;
   struct lef_t *lef ;
-  long clock ;
+  int clock ;
 } ;
 
 struct base_t {
@@ -75,31 +75,53 @@ struct miss_t {
   int cy ;
 } ;
 
-
-
+//funcoes:
 
 int aleat(int min, int max) {
 
   return rand() % (max - min + 1) + min;
 }
 
-//funcao exclusiva deste arquivo
-struct hero_t *Heroes_create (int nheroes, int nskills) {
+void random_skills (struct hero_t *h) {
 
   int i, tam ;
-  struct hero_t *h ;
 
-  h = malloc(sizeof(struct hero_t) * nheroes) ;
   if (!h)
-    return NULL ;
+    return ;
 
-  for (i = 0; i < nheroes; i++) {
+  for (i = 0; i < N_HEROIS; i++) {
 
-    h[i].Skills = set_create (nskills) ;
+    srand(i) ;
+
+    h[i].Skills = set_create (N_HABILIDADES) ;
     tam = aleat(1, 3) ;
 
     //laço para evitar repetiçoes nas habilidades
-    while( set_card(h[i].Skills) < tam) 
+    while( set_card(h[i].Skills) < tam)
+      set_add (h[i].Skills, aleat(0, 9)) ;
+    
+  }
+}
+
+//funcao exclusiva deste arquivo
+struct hero_t *Heroes_create () {
+
+  int i , tam ;
+  struct hero_t *h ;
+
+  h = malloc(sizeof(struct hero_t) * N_HEROIS) ;
+  if (!h)
+    return NULL ;
+
+  for (i = 0; i < N_HEROIS; i++) {
+
+    srand(i) ;
+
+    h[i].Skills = set_create (N_HABILIDADES) ;
+    tam = aleat(1, 3) ;
+
+    //laço para evitar repetiçoes nas habilidades
+    while( set_card(h[i].Skills) < tam)
       set_add (h[i].Skills, aleat(0, 9)) ;
 
     h[i].id = i ; 
@@ -108,6 +130,7 @@ struct hero_t *Heroes_create (int nheroes, int nskills) {
     h[i].xp = 0 ;
     //BaseId nao inicializado ainda
   }
+
   return h ;
 }
 
@@ -123,6 +146,10 @@ struct base_t *Bases_create (int wsize, int nbases, int nheroes) {
 
   for (i = 0; i < nbases; i++) {
 
+    srand(i * 2) ;
+
+    b[i].id = i ;
+    b[i].size = aleat(3, 10) ;
     b[i].party = set_create(nheroes) ;
     b[i].cx = aleat(0, wsize -1) ;
     b[i].cy = aleat(0, wsize -1) ;
@@ -144,6 +171,8 @@ struct miss_t *Miss_create (int nmiss, int wsize) {
 
   for (i = 0; i < nmiss; i++) {
 
+    srand(i * 2) ;
+
     m[i].id = aleat(0, nmiss -1) ;
     m[i].cx = aleat(0, wsize -1) ;
     m[i].cy = aleat(0, wsize -1) ;
@@ -152,24 +181,23 @@ struct miss_t *Miss_create (int nmiss, int wsize) {
   return m ;
 }
 
-struct world_t *world_create (long tstart, int wsize, int nskills,int nheroes,
-                              int nbases, long nmiss) {
+struct world_t *world_create () {
 
   struct world_t *w ; 
 
   w = malloc(sizeof(struct world_t)) ;
 
-  w->NHeroes = nheroes ;
-  w->NBases = nbases ;
-  w->NMiss = nmiss ;
-  w->WSize = wsize ;
-  w->clock = tstart ;
+  w->NHeroes = N_HEROIS ;
+  w->NBases = N_BASES ;
+  w->NMiss = N_MISSOES ;
+  w->WSize = N_TAMANHO_MUNDO ;
+  w->clock = T_INICIO ;
   w->lef = cria_lef() ;
 
   //seta os vetores 
-  w->Heroes = Heroes_create(nheroes, nskills) ;
-  w->Bases = Bases_create(wsize, nbases, nheroes) ;
-  w->Miss = Miss_create(nmiss, wsize) ;
+  w->Heroes = Heroes_create(N_HEROIS, N_HABILIDADES) ;
+  w->Bases = Bases_create(N_TAMANHO_MUNDO, N_BASES, N_HEROIS) ;
+  w->Miss = Miss_create(N_MISSOES, N_TAMANHO_MUNDO) ;
 
   if (!w->Heroes || !w->Bases || !w->Miss)
     return NULL ;
@@ -197,6 +225,7 @@ struct world_t *world_destroy (struct world_t *w) {
     set_destroy (w->Miss[i].skills) ;
  
   destroi_lef(w->lef) ;
+  free(w->Miss) ;
   free(w->Heroes) ;
   free(w->Bases) ;
   free(w) ;
@@ -204,7 +233,7 @@ struct world_t *world_destroy (struct world_t *w) {
   return NULL ;
 }
 
-int world_start (struct world_t *w, long tend) {
+ int world_start (struct world_t *w, int tend) {
 
   int i ;
   struct evento_t *ev ;
@@ -212,11 +241,13 @@ int world_start (struct world_t *w, long tend) {
   if (!w || !w->Heroes || !w->Miss || !w->Bases) 
     return 0 ;
 
-  for (i = 0; i < w->NBases; i++) {
+  for (i = 0; i < N_HEROIS; i++) {
     
-    w->Heroes[i].BaseId = aleat(0, w->NBases) ;
+    srand(i) ;
+
+    w->Heroes[i].BaseId = aleat(0, N_BASES) ;
     w->Heroes[i].time = aleat(0, 4320) ;
-    ev = cria_evento(0, 1, w->Heroes[i].id, w->Heroes[i].BaseId) ;
+    ev = cria_evento(w->clock, 1, w->Heroes[i].id, w->Heroes[i].BaseId) ;
     insere_lef(w->lef, ev) ;
   }
 
@@ -230,32 +261,34 @@ int world_start (struct world_t *w, long tend) {
   insere_lef (w->lef, ev) ;
 
   return 1 ;
-}
+} 
 
-int trata_evento_fim (struct world_t *w, long tend) {
+int trata_evento_fim (struct world_t *w, struct evento_t *end) {
 
   int i ;
 
   if (!w || !w->Heroes) 
     return 0 ;
 
-  printf("%ld: FIM\n", tend) ;
+  printf("%d: FIM\n", end->tempo) ;
 
   for (i = 0 ; i < w->NHeroes ; i++) {
 
-    printf("HEROI %d PAC %d VEL %d EXP %d HABS", w->Heroes[i].id, 
+    printf("HEROI %d PAC %d VEL %d EXP %d HABS ", w->Heroes[i].id, 
             w->Heroes[i].patience, w->Heroes[i].speed, w->Heroes[i].xp) ;
   
-    set_print(w->Heroes->Skills) ;
+    set_print(w->Heroes[i].Skills) ;
+    printf("\n") ;
   }  
 
   //terminar 
-  printf("/ MISSOES CUMPRIDAS (2f), MEDIA 2f TENTATIVAS/MISSAO") ;
+  printf("/ MISSOES CUMPRIDAS (2f), MEDIA 2f TENTATIVAS/MISSAO\n") ;
 
   return 1 ;
 } 
 
-int trata_evento_chega(struct world_t *w, struct hero_t *h, struct base_t *b) {
+//passar nos ponteiros o endereço deles no vetor
+/* int trata_evento_chega(struct world_t *w, struct hero_t *h, struct base_t *b) {
 
   struct evento_t *ev ;
   bool espera ;
@@ -270,16 +303,69 @@ int trata_evento_chega(struct world_t *w, struct hero_t *h, struct base_t *b) {
     
   if (espera) {
   
+    printf("%d: CHEGA HEROI %d BASE %d (%d/%d) ESPERA\n", w->clock, h->id, b->id,
+            b->NHeroes, b->size) ;
     ev = cria_evento(w->clock, 2, h->id, b->id) ;
     insere_lef(w->lef, ev) ;
+
+    return 1 ;
   }
-  else {
-  
-    ev = cria_evento(w->clock, 3, h->id, b->id) ;
-    insere_lef(w->lef, ev) ;
-  }
-  
+
+  printf("%d: CHEGA HEROI %d BASE %d (%d/%d) DESISTE\n", w->clock, h->id, b->id,
+          b->NHeroes, b->size) ;
+  ev = cria_evento(w->clock, 3, h->id, b->id) ;
+  insere_lef(w->lef, ev) ;
+
   return 1 ;
+} */
+
+//passar nos ponteiros o endereço deles no vetor
+int trata_evento_espera(struct world_t *w, struct hero_t *h, struct base_t *b) {
+
+  if (!h || !b) 
+    return 0 ;
+
+  lista_insere(b->wait, h->id, -1) ;
+  cria_evento(w->clock, 4, b->id, 0) ;
+  printf("%d: ESPERA HEROI %d BASE %d (%d)\n", w->clock, h->id, b->id,
+         lista_tamanho(b->wait)) ; 
+
+  return 1 ;
+}
+
+void imprime_t (struct world_t *w) { 
+
+  int i ;
+  char n ;
+
+  n = 'W' ;
+
+  printf("HEROIS\n") ;
+  for (i = 0; i < N_HEROIS; i++) {
+    
+    printf("id %d, pac %d, spe %d, Bid %d ", w->Heroes[i].id,
+            w->Heroes[i].patience,w->Heroes[i].speed, w->Heroes[i].BaseId) ;
+    set_print(w->Heroes[i].Skills) ;
+    printf("\n") ;
+  }
+
+  printf("BASES:\n") ;
+  for (i = 0; i < N_BASES; i++) {
+    
+    printf("id %d, size %d, cx %d, cy %d ", w->Bases[i].id,
+          w->Bases[i].size, w->Bases[i].cx, w->Bases[i].cy) ;
+
+    set_print(w->Bases[i].party) ;
+    lista_imprime(&n, w->Bases[i].wait) ;
+  }
+
+  /*for (i = 0; i < N_MISSOES; i++) {
+    
+    printf("Missoes: \n") ;
+    printf("id %d, cx %d, cy %d ", w->Miss[i].id, w->Miss[i].cx,w->Miss[i].cy) ;
+    set_print(w->Miss[i].skills) ;
+    printf("\n") ;
+  } */
 }
 
 
@@ -289,35 +375,41 @@ int main () {
 
   struct world_t *w ;
   struct evento_t *ev ;
-  struct hero_t *h ;
-  struct base_t *b ;
+  //struct hero_t *h ;
+  //struct base_t *b ;
 
   // iniciar o mundo
-  srand(0) ;
 
-  w = world_create(T_INICIO, N_TAMANHO_MUNDO, N_HABILIDADES, N_HEROIS,
-                   N_BASES, N_MISSOES) ;
+  w = world_create() ;
+
   world_start(w, T_FIM_DO_MUNDO) ;
 
+  //imprime_t(w) ;
+
   imprime_lef(w->lef) ;
+   
 
   // executar o laço de simulação
-  while (w->clock <= T_FIM_DO_MUNDO) {
+  while (w->clock < T_FIM_DO_MUNDO) {
 
     ev = retira_lef(w->lef) ; 
+
     w->clock = ev->tempo ;
 
     switch (ev->tipo) {
 
       case EV_CHEGA :
        
-        h = &w->Heroes[ev->dado1] ;
-        b = &w->Bases[ev->dado2] ;
-        trata_evento_chega(w, h, b) ;
+        /* h = w->Heroes[ev->dado1] ;
+        b = w->Bases[ev->dado2] ;
+        trata_evento_chega(w, &h, &b) ;*/
+        printf("chega\n") ;
+        free(ev) ; 
         break ;
 
       case EV_ESPERA :
 
+        
         break ;
 
       case EV_DESISTE :
@@ -346,13 +438,11 @@ int main () {
 
       case EV_FIM :
         
-        trata_evento_fim(w, w->clock) ;
+        trata_evento_fim(w, ev) ;
         break ;
 
     }
-
-
-  }
+  } 
 
   // destruir o mundo
   w = world_destroy(w) ;
