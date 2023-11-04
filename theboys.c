@@ -288,7 +288,7 @@ int trata_evento_fim (struct world_t *w, struct evento_t *end) {
 } 
 
 //passar nos ponteiros o endereço deles no vetor
-/* int trata_evento_chega(struct world_t *w, struct hero_t *h, struct base_t *b) {
+ int trata_evento_chega(struct world_t *w, struct hero_t *h, struct base_t *b) {
 
   struct evento_t *ev ;
   bool espera ;
@@ -317,7 +317,7 @@ int trata_evento_fim (struct world_t *w, struct evento_t *end) {
   insere_lef(w->lef, ev) ;
 
   return 1 ;
-} */
+} 
 
 //passar nos ponteiros o endereço deles no vetor
 int trata_evento_espera(struct world_t *w, struct hero_t *h, struct base_t *b) {
@@ -333,7 +333,7 @@ int trata_evento_espera(struct world_t *w, struct hero_t *h, struct base_t *b) {
   return 1 ;
 }
 
-void imprime_t (struct world_t *w) { 
+void imprime_t (struct world_t *w) { //FUNCAO PARA TESTE
 
   int i ;
   char n ;
