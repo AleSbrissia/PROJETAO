@@ -346,6 +346,7 @@ int main () {
   world_start(w, T_FIM_DO_MUNDO) ;
 
   //imprime_lef(w->lef) ;
+  imprime_t(w) ;
 
   // executar o laço de simulação
 /*  while (w->clock <= T_FIM_DO_MUNDO) {
@@ -396,10 +397,10 @@ int main () {
         //trata_evento_fim(w, w->clock) ;
         break ;
 
-    }*/
+    }
 
 
-  }
+  } */
 
   // destruir o mundo
   w = world_destroy(w) ;
