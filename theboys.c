@@ -50,6 +50,7 @@ struct base_t {
   int id ;
   int size ;
   struct set_t *party ;
+  struct set_t *skills ;
   lista_t *wait ;
   int NHeroes ;
   int cx ;
@@ -126,6 +127,7 @@ struct base_t *Bases_create (int wsize, int nbases, int nheroes) {
     b[i].cx = aleat(0, wsize -1) ;
     b[i].cy = aleat(0, wsize -1) ;
     b[i].wait = lista_cria() ;
+    b[i].skills = set_create(N_HABILIDADES) ;
   }
   return b ; 
 }
@@ -143,7 +145,7 @@ struct miss_t *Miss_create (int nmiss, int wsize) {
 
   for (i = 0; i < nmiss; i++) {
 
-    m[i].id = aleat(0, nmiss -1) ;
+    m[i].id = i ;
     m[i].cx = aleat(0, wsize -1) ;
     m[i].cy = aleat(0, wsize -1) ;
     m[i].skills = set_create(N_HABILIDADES) ;
@@ -201,9 +203,10 @@ struct world_t *world_destroy (struct world_t *w) {
   for (i = 0; i < w->NMiss ; i++) 
     set_destroy (w->Miss[i].skills) ;
  
-  destroi_lef(w->lef) ;
+  w->lef = destroi_lef(w->lef) ;
   free(w->Heroes) ;
   free(w->Bases) ;
+  free(w->Miss) ;
   free(w) ;
 
   return NULL ;
@@ -310,7 +313,7 @@ void imprime_t (struct world_t *w) { //FUNCAO PARA TESTE
   for (i = 0; i < N_HEROIS; i++) {
     
     printf("id %d, pac %d, spe %d, Bid %d ", w->Heroes[i].id,
-            w->Heroes[i].patience,w->Heroes[i].speed, w->Heroes[i].BaseId) ;
+            w->Heroes[i].patience, w->Heroes[i].speed, w->Heroes[i].BaseId) ;
     set_print(w->Heroes[i].Skills) ;
     printf("\n") ;
   }
@@ -322,16 +325,17 @@ void imprime_t (struct world_t *w) { //FUNCAO PARA TESTE
           w->Bases[i].size, w->Bases[i].cx, w->Bases[i].cy) ;
 
     set_print(w->Bases[i].party) ;
+    set_print(w->Bases[i].skills) ;
     lista_imprime(&n, w->Bases[i].wait) ;
   }
 
-  printf("Missoes: \n") ;
+  /*printf("Missoes: \n") ;
   for (i = 0; i < N_MISSOES; i++) {
     
     printf("id %d, cx %d, cy %d ", w->Miss[i].id, w->Miss[i].cx,w->Miss[i].cy) ;
     set_print(w->Miss[i].skills) ;
     printf("\n") ;
-  } 
+  } */
 }
 
 // programa principal
