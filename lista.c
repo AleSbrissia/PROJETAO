@@ -8,10 +8,10 @@
 
 //recebe uma lista e uma posição e retorna o endereço do node 
 //funcao exclusiva desse arquivo
-struct lnode_t * acha_node (struct lista_t * lst, int pos) {
+lnode_t * acha_node ( lista_t * lst, int pos) {
 
   int i ;
-  struct lnode_t *cont ;
+  lnode_t *cont ;
 
   cont = lst->head ;
 
@@ -21,22 +21,22 @@ struct lnode_t * acha_node (struct lista_t * lst, int pos) {
   return (cont) ;
 }
 
-struct lista_t* lista_cria () {
+lista_t* lista_cria () {
 
-  struct lista_t *ptr ;
+  lista_t *ptr ;
 
-  ptr = malloc( sizeof (struct lista_t)) ;
+  ptr = malloc( sizeof (lista_t)) ;
 
   ptr->size = 0 ;
   ptr->head = NULL ;
-  ptr->tail = NULL ; //perguntar se eh inutil ou nao
+  ptr->tail = NULL ; 
 
   return ptr ;
 }
 
-struct lista_t* lista_destroi (struct lista_t* lst) {
+lista_t* lista_destroi (lista_t* lst) {
 
-  struct lnode_t *aux ;
+  lnode_t *aux ;
 
   if ( lista_vazia( lst) == 1) {
 
@@ -59,15 +59,15 @@ struct lista_t* lista_destroi (struct lista_t* lst) {
   return NULL ;
 }
 
-int lista_tamanho (struct lista_t* lst) { 
+int lista_tamanho (lista_t* lst) { 
 
   return (lst->size) ;
 }
 
-int lista_vazia (struct lista_t* lst) {
+int lista_vazia (lista_t* lst) {
 
   if(!lst)
-    return 1 ;
+    return -1 ;
 
   if( lst->size == 0)
     return 1 ;
@@ -75,10 +75,10 @@ int lista_vazia (struct lista_t* lst) {
   return 0 ;
 }
 
-int lista_procura (struct lista_t* lst, int elem) {
+int lista_procura (lista_t* lst, int elem) {
 
   int cont ;
-  struct lnode_t *aux ;
+  lnode_t *aux ;
 
   aux = lst->head ;
 
@@ -100,9 +100,9 @@ int lista_procura (struct lista_t* lst, int elem) {
 
 }
 
-int lista_consulta (struct lista_t* lst, int* elem, int pos) {
+int lista_consulta (lista_t* lst, int* elem, int pos) {
 
-  struct lnode_t *aux ;
+  lnode_t *aux ;
 
   if(!elem || !lst)
     return -1 ;
@@ -117,15 +117,15 @@ int lista_consulta (struct lista_t* lst, int* elem, int pos) {
   return lista_tamanho(lst) ;
 }
 
-int lista_insere (struct lista_t* lst, int elem, int pos) {
+int lista_insere (lista_t* lst, int elem, int pos) {
 
   int i ;
-  struct lnode_t *aux, *cont ;
+  lnode_t *aux, *cont ;
 
   if( !lst) 
     return -1 ;
 
-  aux = malloc( sizeof(struct lnode_t)) ;
+  aux = malloc( sizeof( lnode_t)) ;
 
   aux->val = elem ;
   aux->prev = NULL ;
@@ -177,9 +177,9 @@ int lista_insere (struct lista_t* lst, int elem, int pos) {
   return( lista_tamanho(lst)) ;
 }
 
-int lista_retira (struct lista_t* lst, int* elem, int pos) {
+int lista_retira (lista_t* lst, int* elem, int pos) {
 
-  struct lnode_t *aux ;
+  lnode_t *aux ;
 
   if (!lst )
     return -1 ;
@@ -244,9 +244,9 @@ int lista_retira (struct lista_t* lst, int* elem, int pos) {
 
 }
 
-void lista_imprime (char *nome, struct lista_t* lst) {
+void lista_imprime (char *nome, lista_t* lst) {
 
-  struct lnode_t *ptr;
+  lnode_t *ptr;
   if (!nome || !lst)
     return ;
 
