@@ -62,7 +62,6 @@ struct hero_t {
   struct set_t *Skills ;
   int patience ;
   int speed ;
-  int time ;
   int xp ;
   int BaseId ;
 } ;
@@ -135,7 +134,7 @@ struct base_t *Bases_create (int wsize, int nbases, int nheroes) {
 // aloca um vetor de missoes e inicializa os conjuntos de habilidades
 struct miss_t *Miss_create (int nmiss, int wsize) {
 
-  int i ;
+  int i, tam ;
   struct miss_t *m ;
 
   m = malloc(sizeof(struct miss_t) * nmiss) ;
@@ -147,7 +146,13 @@ struct miss_t *Miss_create (int nmiss, int wsize) {
     m[i].id = aleat(0, nmiss -1) ;
     m[i].cx = aleat(0, wsize -1) ;
     m[i].cy = aleat(0, wsize -1) ;
-    m[i].skills = set_create(aleat(6, 10)) ;
+    m[i].skills = set_create(N_HABILIDADES) ;
+    tam = aleat(6, 10) ;
+
+    //laço para evitar repetiçoes nas habilidades
+    while( set_card(m[i].skills) < tam) 
+      set_add (m[i].skills, aleat(0, 9)) ;
+
   }
   return m ;
 }
@@ -215,7 +220,6 @@ int world_start (struct world_t *w, long tend) {
   for (i = 0; i < w->NHeroes; i++) {
     
     w->Heroes[i].BaseId = aleat(0, w->NBases) ;
-    w->Heroes[i].time = aleat(0, 4320) ;
     ev = cria_evento(0, 1, w->Heroes[i].id, w->Heroes[i].BaseId) ;
     insere_lef(w->lef, ev) ;
   }
@@ -321,13 +325,13 @@ void imprime_t (struct world_t *w) { //FUNCAO PARA TESTE
     lista_imprime(&n, w->Bases[i].wait) ;
   }
 
-  /*for (i = 0; i < N_MISSOES; i++) {
+  printf("Missoes: \n") ;
+  for (i = 0; i < N_MISSOES; i++) {
     
-    printf("Missoes: \n") ;
     printf("id %d, cx %d, cy %d ", w->Miss[i].id, w->Miss[i].cx,w->Miss[i].cy) ;
     set_print(w->Miss[i].skills) ;
     printf("\n") ;
-  } */
+  } 
 }
 
 // programa principal
