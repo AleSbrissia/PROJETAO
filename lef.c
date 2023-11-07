@@ -79,8 +79,8 @@ struct lef_t *destroi_lef (struct lef_t *l) {
     aux = l->primeiro ;
     if (!aux->prox) {
       
-      free(aux) ;
       free(aux->evento) ;
+      free(aux) ;
       break ; 
     }
 
@@ -88,6 +88,7 @@ struct lef_t *destroi_lef (struct lef_t *l) {
     free(aux->evento) ;
     free(aux) ;
   }
+  free(l) ;
 
   return NULL ;
 }

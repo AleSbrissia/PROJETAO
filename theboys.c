@@ -197,13 +197,14 @@ struct world_t *world_destroy (struct world_t *w) {
   for (i = 0 ; i < w->NBases ; i++) {
 
     set_destroy (w->Bases[i].party) ;
+    set_destroy (w->Bases[i].skills) ;
     lista_destroi (w->Bases[i].wait) ;
   }
 
   for (i = 0; i < w->NMiss ; i++) 
     set_destroy (w->Miss[i].skills) ;
  
-  w->lef = destroi_lef(w->lef) ;
+  destroi_lef(w->lef) ;
   free(w->Heroes) ;
   free(w->Bases) ;
   free(w->Miss) ;
