@@ -123,6 +123,7 @@ struct base_t *Bases_create (int wsize, int nbases, int nheroes) {
   for (i = 0; i < nbases; i++) {
 
     b[i].id = i ;
+    b[i].size = aleat(3, 10) ;
     b[i].party = set_create(nheroes) ;
     b[i].cx = aleat(0, wsize -1) ;
     b[i].cy = aleat(0, wsize -1) ;
@@ -322,8 +323,16 @@ void imprime_t (struct world_t *w) { //FUNCAO PARA TESTE
   printf("BASES:\n") ;
   for (i = 0; i < N_BASES; i++) {
     
-    printf("id %d, size %d, cx %d, cy %d ", w->Bases[i].id,
-          w->Bases[i].size, w->Bases[i].cx, w->Bases[i].cy) ;
+   /* printf("id %d, size %d, cx %d, cy %d ", w->Bases[i].id,
+          w->Bases[i].size, w->Bases[i].cx, w->Bases[i].cy) ; */
+
+    printf("id %d ", w->Bases[i].id);
+
+    printf("size %d ", w->Bases[i].size) ;
+
+    printf("cx %d ", w->Bases[i].cx) ;
+
+    printf("cy %d ",w->Bases[i].cy) ;
 
     set_print(w->Bases[i].party) ;
     set_print(w->Bases[i].skills) ;

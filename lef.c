@@ -76,21 +76,16 @@ struct lef_t *destroi_lef (struct lef_t *l) {
   /*destroi do começo para o fim*/
   while (aux->prox) {
 
-    aux = l->primeiro ;
-    if (!aux->prox) {
-      
-      free(aux->evento) ;
-      free(aux) ;
-      break ; 
-    }
-
     l->primeiro = aux->prox ;
-    free(aux->evento) ;
+    destroi_evento(aux->evento) ;
     free(aux) ;
+    aux = l->primeiro ;
   }
+  
+  free(aux->evento) ;
+  free(aux) ;
   free(l) ;
-
-  return NULL ;
+  return NULL ; 
 }
 
 /*
