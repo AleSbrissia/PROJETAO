@@ -271,7 +271,7 @@ int trata_evento_chega(struct world_t *w, struct evento_t *ch) {
   bool espera ;
   int d1, d2 ;
 
-  if (!w || !w->lef) 
+  if (!w || !w->lef || !w->Bases[ch->dado2].wait ) 
     return 0 ; 
 
   d1 = ch->dado1 ;
@@ -286,11 +286,17 @@ int trata_evento_chega(struct world_t *w, struct evento_t *ch) {
   if (espera) {
   
     ev = cria_evento(w->clock, 2, w->Heroes[d1].id, w->Bases[d2].id) ;
+    printf("%d: CHEGA  HEROI %d BASE %d (%d/%d) ESPERA\n", w->clock,
+           w->Heroes[d1].id, w->Bases[d2].id, w->Bases[d2].NHeroes,
+           w->Bases[d2].size) ;
     insere_lef(w->lef, ev) ;
   }
   else {
   
     ev = cria_evento(w->clock, 3, w->Heroes[d1].id, w->Bases[d2].id) ;
+    printf("%d: CHEGA  HEROI %d BASE %d (%d/%d) DESISTE\n", w->clock,
+           w->Heroes[d1].id, w->Bases[d2].id, w->Bases[d2].NHeroes,
+           w->Bases[d2].size) ;
     insere_lef(w->lef, ev) ;
   }
   
@@ -361,8 +367,8 @@ int main () {
                    N_BASES, N_MISSOES) ;
   world_start(w, T_FIM_DO_MUNDO) ;
 
-  imprime_lef(w->lef) ;
-  //imprime_t(w) ;
+  //imprime_lef(w->lef) ;
+  imprime_t(w) ;
 
   // executar o laço de simulação
   while (w->clock < T_FIM_DO_MUNDO) {
@@ -374,7 +380,6 @@ int main () {
 
       case EV_CHEGA :
        
-        printf("%d\n", ev->dado2) ; 
         trata_evento_chega(w, ev) ;
         destroi_evento(ev) ;
         break ;
