@@ -46,8 +46,10 @@ struct lef_t *cria_lef () {
 
   p = malloc(sizeof(struct lef_t)) ;
 
-  if (!p)
+  if (!p) {
+    printf("ERRO MALLOC CRIA_LEF \n") ;
     return NULL ;
+  }
 
   p->primeiro = NULL ;
 
@@ -64,7 +66,7 @@ struct lef_t *destroi_lef (struct lef_t *l) {
 
   if (!l) 
     return NULL ;
-  if (vazia_lef(l) == 1) {
+  if (!l->primeiro) {
    
     free(l) ;
     return NULL ;
@@ -78,6 +80,7 @@ struct lef_t *destroi_lef (struct lef_t *l) {
     if (!aux->prox) {
       
       free(aux) ;
+      free(aux->evento) ;
       break ; 
     }
 
@@ -96,72 +99,51 @@ struct lef_t *destroi_lef (struct lef_t *l) {
 */
 int insere_lef (struct lef_t *l, struct evento_t *e) {
 
-  struct nodo_lef_t *aux, *ptr ;
-  int cont ;
+	struct nodo_lef_t *aux, *p ;
 
-  if (!l || !e)
+	if (!l || !e)
+		return 0 ;
+
+	p = malloc (sizeof (struct nodo_lef_t)) ;
+  if (!p)
     return 0 ;
 
-  aux = malloc(sizeof(struct nodo_lef_t)) ;
-  if (!aux)
-    return 0 ;
-  aux->evento = e ;
+	p->evento = e ;
+	p->prox = NULL ;
+	aux = l->primeiro ;
 
-  /*caso a lista esteja vazia*/
-  if (vazia_lef(l) == 1) {
+	if (aux == NULL) 
+		l->primeiro = p ;
 
-    l->primeiro = aux ;
-    aux->prox = NULL ;
-    return 1 ;
-  }
- 
-  /*seta as variaveis para o while*/
-  ptr = l->primeiro ;
-  cont = 0 ;
+	else
+    if (aux->evento->tempo > p->evento->tempo) {
 
-  /*
-   *aponta ptr para o nodo na posicao a ser inserida,
-   *cont recebe a posicao na lef.
-  */
-  while (ptr->evento->tempo <= aux->evento->tempo) {
-    
-    /*caso o nodo for inserido na ultima posicao*/
-    if (!ptr->prox) {
-    
-      if (ptr->evento->tempo < aux->evento->tempo) { 
-
-        ptr->prox = aux ;  
-        aux->prox = NULL ;
-        return 1 ;
-      }
-      break ;
+      l->primeiro = p ;
+      p->prox = aux ;
     }
-    ptr = ptr->prox ;
-    cont++ ;
-  }
 
-  /*caso o nodo for inserido na primeira posicao, 0.*/
-  if (cont == 0) {
+	else 
+    if (aux->prox == NULL) 
+      aux->prox = p ;
 
-    aux->prox = l->primeiro ;
-    l->primeiro = aux ;
-    return 1 ;
-  }
+ 	else {
 
-  ptr = l->primeiro ;  
-  /* aponta p para a posicao anterior a ser inserida*/
-  while (cont -1 > 0) {
+		while (aux->prox) {
 
-    ptr = ptr->prox ;
-    cont-- ;
-  }  
+			if (aux->prox->evento->tempo > p->evento->tempo) {
 
-  /*insere o nodo na lef*/
-  aux->prox = ptr->prox ;
-  ptr->prox = aux ;
+				p->prox = aux->prox;
+				aux->prox = p;
+				break;
+			}
+			aux = aux->prox ;
+		} 
+		aux->prox = p ;
+	}
 
-  return 1 ;
+	return 1 ;
 }
+
 
 /* 
  * Retira o primeiro evento da LEF.
@@ -172,8 +154,15 @@ struct evento_t *retira_lef (struct lef_t *l) {
   struct evento_t *ev ;
   struct nodo_lef_t *pn ;
   
+  if (!l)
+    return NULL ; 
+
+  if (vazia_lef(l))
+    return NULL ;
+
   ev = l->primeiro->evento ;
   pn = l->primeiro ;
+  pn->evento = NULL ;
   l->primeiro = l->primeiro->prox ;
   free(pn);
 
