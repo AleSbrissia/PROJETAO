@@ -257,7 +257,6 @@ int trata_evento_fim (struct world_t *w, struct evento_t *end) {
             w->Heroes[i].patience, w->Heroes[i].speed, w->Heroes[i].xp) ;
   
     set_print(w->Heroes[i].Skills) ;
-    printf("\n") ;
   }  
 
   //terminar 
@@ -370,16 +369,17 @@ int trata_evento_avisa(struct world_t *w, struct base_t *b) {
 
 int trata_evento_entra (struct world_t *w, struct hero_t *h, struct base_t *b) {
 
-  int tpb ;
+  int tpb, r ;
   struct evento_t *ev ;
 
   if (!w || !h || !b) 
     return 0 ;
 
-  tpb = 15 + (h->patience * aleat(1, 20)) ;
+  r = aleat(1, 20) ;
+  tpb = 15 + (h->patience * r) ;
   printf("%6d: ENTRA  HEROI %2d BASE %d (%2d/%2d) SAI %d\n", w->clock, h->id,
          b->id, set_card(b->party), b->size, tpb) ;
-  ev = cria_evento(tpb, EV_SAI, h->id, b->id) ;
+  ev = cria_evento(w->clock +tpb, EV_SAI, h->id, b->id) ;
   insere_lef(w->lef, ev) ;
 
   return 1 ;
@@ -532,7 +532,7 @@ int main () {
 
       case EV_AVISA :
 
-        //trata_evento_avisa(w, &w->Bases[ev->dado2]) ;
+        trata_evento_avisa(w, &w->Bases[ev->dado2]) ;
         destroi_evento(ev) ;
         break ;
 
@@ -550,7 +550,7 @@ int main () {
 
       case EV_VIAJA :
 
-        //trata_evento_viaja(w, &w->Heroes[ev->dado1], &w->Bases[ev->dado2]) ;
+        trata_evento_viaja(w, &w->Heroes[ev->dado1], &w->Bases[ev->dado2]) ;
         destroi_evento(ev) ;
         break ;
 
