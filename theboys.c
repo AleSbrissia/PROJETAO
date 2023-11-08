@@ -257,6 +257,7 @@ int trata_evento_fim (struct world_t *w, struct evento_t *end) {
             w->Heroes[i].patience, w->Heroes[i].speed, w->Heroes[i].xp) ;
   
     set_print(w->Heroes[i].Skills) ;
+    printf("\n") ;
   }  
 
   //terminar 
@@ -450,6 +451,64 @@ int trata_evento_viaja (struct world_t *w, struct hero_t *h, struct base_t *b) {
   return 1 ;
 }
 
+int trata_evento_missao (struct world_t *w, struct evento_t *ev) {
+
+  int dis, d, i, bmp ;
+  struct evento_t *ad ;
+  struct miss_t *m ;
+  struct base_t *b ;
+
+  if (!w || !ev) 
+    return 0 ;
+
+  m = &w->Miss[ev->dado1] ;
+  dis = 2 * N_TAMANHO_MUNDO ; //inicializa dis fora do mapa
+  bmp = -1 ;
+  
+  printf("%6d: MISSAO %4d HAB REQ:", w->clock, m->id) ;
+  set_print(m->skills) ;
+  printf("\n") ;
+
+  for (i = 0 ; i < w->NBases -1 ; i++) {
+
+    b = &w->Bases[i] ;
+    d = sqrt((m->cx - b->cx)*(m->cx - b->cx) + (m->cy - b->cy)*(m->cy - b->cy)) ;
+
+    if (dis > d) {
+
+      dis = d ;
+      if ( set_contains(b->skills, m->skills)) {
+
+        printf("%6d: MISSAO %4d HAB BASE %d:", w->clock, m->id, b->id) ;
+        set_print(b->skills) ;
+        printf("\n") ;
+        bmp = i ;
+      }
+    }
+  }  
+  
+  if (bmp == -1) {
+
+    ad = cria_evento(ev->tempo + 24 * 60, EV_MISSAO, ev->dado1, 0) ;
+    insere_lef(w->lef, ad) ;
+    printf("%6d: MISSAO %4d IMPOSSIVEL\n", w->clock, m->id);
+
+    return 1 ;
+  }
+
+  b = &w->Bases[bmp] ;
+  for ( i = 0 ; i < w->NHeroes -1 ; i++)
+    if ( set_in(b->party, i)) 
+      w->Heroes[i].xp++ ;
+    
+  printf("%6d: MISSAO %4d CUMPRIDA BASE %d HEROIS:", w->clock, m->id, b->id) ; 
+  set_print(b->party) ;
+  printf("\n") ;
+  
+  return 1 ;
+}
+
+
 void imprime_t (struct world_t *w) { //FUNCAO PARA TESTE
 
   int i ;
@@ -491,8 +550,6 @@ int main () {
 
   struct world_t *w ;
   struct evento_t *ev ;
-  /*struct hero_t *h ;
-  struct base_t *b ;*/
 
   // iniciar o mundo
   srand(0) ;
@@ -556,6 +613,7 @@ int main () {
 
       case EV_MISSAO :
 
+        trata_evento_missao(w, ev) ;
         destroi_evento(ev) ;
         break ;
 
@@ -575,4 +633,6 @@ int main () {
 
   return 0 ;
 }
+
+
 
