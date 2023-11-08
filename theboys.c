@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 #include "set.h"
 #include "lista.h"
 #include "lef.h"
@@ -52,7 +53,7 @@ struct base_t {
   struct set_t *party ;
   struct set_t *skills ;
   lista_t *wait ;
-  int NHeroes ;
+  //int NHeroes ;
   int cx ;
   int cy ;
 } ;
@@ -111,16 +112,16 @@ struct hero_t *Heroes_create (int nheroes, int nskills) {
 }
 
 //funcao exclusiva deste arquivo
-struct base_t *Bases_create (int wsize, int nbases, int nheroes) {
+struct base_t *Bases_create (int wsize, int nheroes) {
 
   int i ;
   struct base_t *b ;
   
-  b = malloc(sizeof(struct base_t) * nbases) ;
+  b = malloc(sizeof(struct base_t) * N_BASES) ;
   if (!b)
     return NULL ;
 
-  for (i = 0; i < nbases; i++) {
+  for (i = 0; i < N_BASES; i++) {
 
     b[i].id = i ;
     b[i].size = aleat(3, 10) ;
@@ -176,7 +177,7 @@ struct world_t *world_create (int tstart, int wsize, int nskills,int nheroes,
 
   //seta os vetores 
   w->Heroes = Heroes_create(nheroes, nskills) ;
-  w->Bases = Bases_create(wsize, nbases, nheroes) ;
+  w->Bases = Bases_create(wsize, nheroes) ;
   w->Miss = Miss_create(nmiss, wsize) ;
 
   if (!w->Heroes || !w->Bases || !w->Miss)
@@ -224,7 +225,7 @@ int world_start (struct world_t *w, long tend) {
 
   for (i = 0; i < w->NHeroes; i++) {
     
-    w->Heroes[i].BaseId = aleat(0, w->NBases) ;
+    w->Heroes[i].BaseId = aleat(0, w->NBases -1) ;
     ev = cria_evento(0, 1, w->Heroes[i].id, w->Heroes[i].BaseId) ;
     insere_lef(w->lef, ev) ;
   }
@@ -252,7 +253,7 @@ int trata_evento_fim (struct world_t *w, struct evento_t *end) {
 
   for (i = 0 ; i < w->NHeroes ; i++) {
 
-    printf("HEROI %d PAC %d VEL %d EXP %d HABS ", w->Heroes[i].id, 
+    printf("HEROI %2d PAC %3d VEL %4d EXP %3d HABS ", w->Heroes[i].id, 
             w->Heroes[i].patience, w->Heroes[i].speed, w->Heroes[i].xp) ;
   
     set_print(w->Heroes[i].Skills) ;
@@ -277,7 +278,7 @@ int trata_evento_chega(struct world_t *w, struct evento_t *ch) {
   d1 = ch->dado1 ;
   d2 = ch->dado2 ;
     
-  if (lista_vazia(w->Bases[d2].wait) && w->Bases[d2].NHeroes <
+  if (lista_vazia(w->Bases[d2].wait) && set_card(w->Bases[d2].party) <
       w->Bases[d2].size) 
     espera = true ;
   else 
@@ -285,33 +286,166 @@ int trata_evento_chega(struct world_t *w, struct evento_t *ch) {
     
   if (espera) {
   
-    ev = cria_evento(w->clock, 2, w->Heroes[d1].id, w->Bases[d2].id) ;
-    printf("%d: CHEGA  HEROI %d BASE %d (%d/%d) ESPERA\n", w->clock,
-           w->Heroes[d1].id, w->Bases[d2].id, w->Bases[d2].NHeroes,
+    ev = cria_evento(w->clock , EV_ESPERA, w->Heroes[d1].id, w->Bases[d2].id) ;
+    printf("%6d: CHEGA  HEROI %2d BASE %d (%2d/%2d) ESPERA\n", w->clock,
+           w->Heroes[d1].id, w->Bases[d2].id, set_card(w->Bases[d2].party),
            w->Bases[d2].size) ;
+    w->clock++ ;
     insere_lef(w->lef, ev) ;
   }
   else {
   
-    ev = cria_evento(w->clock, 3, w->Heroes[d1].id, w->Bases[d2].id) ;
-    printf("%d: CHEGA  HEROI %d BASE %d (%d/%d) DESISTE\n", w->clock,
-           w->Heroes[d1].id, w->Bases[d2].id, w->Bases[d2].NHeroes,
+    ev = cria_evento(w->clock +1, EV_DESISTE, w->Heroes[d1].id,
+                       w->Bases[d2].id) ;
+    printf("%6d: CHEGA  HEROI %2d BASE %d (%2d/%2d) DESISTE\n", w->clock,
+           w->Heroes[d1].id, w->Bases[d2].id, set_card(w->Bases[d2].party),
            w->Bases[d2].size) ;
     insere_lef(w->lef, ev) ;
   }
-  
   return 1 ;
 }
 
 int trata_evento_espera(struct world_t *w, struct hero_t *h, struct base_t *b) {
 
-  if (!h || !b) 
+  struct evento_t *ev ;
+
+  if (!h || !b || !w) 
     return 0 ;
 
   lista_insere(b->wait, h->id, -1) ;
-  cria_evento(w->clock, 4, b->id, 0) ;
-  printf("%d: ESPERA HEROI %d BASE %d (%d)\n", w->clock, h->id, b->id,
-         lista_tamanho(b->wait)) ; 
+  ev = cria_evento(w->clock , EV_AVISA, 0, b->id) ;
+  insere_lef(w->lef, ev) ;
+  printf("%6d: ESPERA HEROI %2d BASE %d (%2d)\n", w->clock, h->id, b->id,
+         lista_tamanho(b->wait) -1) ; 
+
+  return 1 ;
+}
+
+int trata_evento_desiste(struct world_t *w, struct evento_t *des) {
+
+  int d1, d2, b ;
+  struct evento_t *ev ;
+
+  if (!w || !des) 
+    return 0 ;
+
+  d1 = des->dado1 ;
+  d2 = des->dado2 ;
+  b = aleat(0, N_BASES -1) ;
+
+  ev = cria_evento(w->clock , EV_VIAJA, d1, b) ;
+  insere_lef(w->lef, ev) ;
+  printf("%6d: DESIST HEROI %2d BASE %d\n", w->clock, d1, d2) ;
+
+  return 1 ;
+}
+
+int trata_evento_avisa(struct world_t *w, struct base_t *b) {
+  
+  int i ;
+  struct evento_t *ev ;
+  char n ;
+
+  if (!w || !b) 
+    return 0 ;
+
+  n = ' ' ;
+
+  printf("%6d: AVISA  PORTEIRO BASE %d (%2d/%2d) FILA", w->clock, b->id, 
+         set_card(b->party), b->size) ;
+  lista_imprime(&n, b->wait) ;
+
+  while (set_card(b->party) < b->size && !lista_vazia(b->wait)) {
+
+    lista_retira(b->wait, &i, 0) ;
+    set_add(b->party, i) ;
+    set_union(b->skills, w->Heroes[i].Skills, b->skills) ;
+    ev = cria_evento(w->clock, EV_ENTRA, i, b->id) ;
+    insere_lef(w->lef, ev) ;
+
+    printf("%6d: AVISA  PORTEIRO BASE %d ADMITE %2d\n", w->clock, b->id, i) ;
+  }
+  return 1 ;
+}
+
+int trata_evento_entra (struct world_t *w, struct hero_t *h, struct base_t *b) {
+
+  int tpb ;
+  struct evento_t *ev ;
+
+  if (!w || !h || !b) 
+    return 0 ;
+
+  tpb = 15 + (h->patience * aleat(1, 20)) ;
+  printf("%6d: ENTRA  HEROI %2d BASE %d (%2d/%2d) SAI %d\n", w->clock, h->id,
+         b->id, set_card(b->party), b->size, tpb) ;
+  ev = cria_evento(tpb, EV_SAI, h->id, b->id) ;
+  insere_lef(w->lef, ev) ;
+
+  return 1 ;
+}
+
+int trata_evento_sai (struct world_t *w, struct evento_t *sai) {
+
+  int i, j, d1, d2 ;
+  struct hero_t *h ; 
+  struct base_t *b ;
+  struct evento_t *ev ;
+
+  if (!w || !sai) 
+    return 0 ;
+
+  h = &w->Heroes[sai->dado1] ;
+  b = &w->Bases[sai->dado2] ;
+  d1 = sai->dado1 ;
+  d2 = sai->dado2 ;
+
+  set_del(b->party, h->id) ;
+  set_intersect(b->skills, h->Skills, b->skills) ;
+
+  j = 0 ;
+  i = 0 ;
+  // laço para refazer o conj habilidades da base
+  while (set_card(b->party) > i ) {
+  
+    for (j = j ; j < w->NHeroes; j++ )    {
+     
+      if (set_in(b->party, j)) {
+
+        set_union(b->skills, w->Heroes[j].Skills, b->skills) ;
+        i++ ;
+      }
+    }
+  }
+
+  ev = cria_evento(w->clock, EV_VIAJA, d1, aleat(0, N_BASES -1)) ;
+  insere_lef(w->lef, ev) ;
+  ev = cria_evento(w->clock, EV_AVISA, 0, d2) ; 
+  insere_lef(w->lef, ev) ;
+  printf("%6d: SAI    HEROI %2d BASE %d (%2d/%2d)\n", w->clock, d1, d2, 
+         set_card(w->Bases[d2].party), b->size) ;
+
+  return 1 ;
+}
+
+int trata_evento_viaja (struct world_t *w, struct hero_t *h, struct base_t *b) {
+
+  int ca, co, dur, dis ;
+  struct evento_t *ev ;
+
+  if (!w || !h || !b)
+    return 0 ;
+
+  ca = (b->cx - w->Bases[h->BaseId].cx ) * (b->cx - w->Bases[h->BaseId].cx) ;
+  co = (b->cy - w->Bases[h->BaseId].cy ) * (b->cy - w->Bases[h->BaseId].cy) ;
+
+  dis = sqrt(ca + co) ;
+  dur = dis / h->speed ;
+
+  ev = cria_evento(w->clock +dur, EV_CHEGA, h->id, b->id) ;
+  insere_lef(w->lef, ev) ;
+  printf("%6d: VIAJA  HEROI %2d BASE %d BASE %d DIST %d VEL %d CHEGA %d\n",
+         w->clock, h->id, h->BaseId, b->id, dis, h->speed, w->clock + dur) ;
 
   return 1 ;
 }
@@ -326,7 +460,7 @@ void imprime_t (struct world_t *w) { //FUNCAO PARA TESTE
   printf("HEROIS\n") ;
   for (i = 0; i < N_HEROIS; i++) {
     
-    printf("id %d, pac %d, spe %d, Bid %d ", w->Heroes[i].id,
+    printf("id %2d, pac %3d, spe %4d, Bid %d ", w->Heroes[i].id,
             w->Heroes[i].patience, w->Heroes[i].speed, w->Heroes[i].BaseId) ;
     set_print(w->Heroes[i].Skills) ;
     printf("\n") ;
@@ -335,7 +469,7 @@ void imprime_t (struct world_t *w) { //FUNCAO PARA TESTE
   printf("BASES:\n") ;
   for (i = 0; i < N_BASES; i++) {
     
-    printf("id %d, size %d, cx %d, cy %d ", w->Bases[i].id,
+    printf("id %d, size %2d, cx %5d, cy %5d ", w->Bases[i].id,
           w->Bases[i].size, w->Bases[i].cx, w->Bases[i].cy) ; 
 
     set_print(w->Bases[i].party) ;
@@ -368,7 +502,7 @@ int main () {
   world_start(w, T_FIM_DO_MUNDO) ;
 
   //imprime_lef(w->lef) ;
-  imprime_t(w) ;
+  //imprime_t(w) ;
 
   // executar o laço de simulação
   while (w->clock < T_FIM_DO_MUNDO) {
@@ -386,31 +520,37 @@ int main () {
 
       case EV_ESPERA :
 
+        trata_evento_espera(w, &w->Heroes[ev->dado1], &w->Bases[ev->dado2]) ;
         destroi_evento(ev) ;
         break ;
 
       case EV_DESISTE :
 
+        trata_evento_desiste(w, ev) ;
         destroi_evento(ev) ;
         break ;
 
       case EV_AVISA :
 
+        //trata_evento_avisa(w, &w->Bases[ev->dado2]) ;
         destroi_evento(ev) ;
         break ;
 
       case EV_ENTRA :
 
+        trata_evento_entra(w, &w->Heroes[ev->dado1], &w->Bases[ev->dado2]) ;
         destroi_evento(ev) ;
         break ;
 
       case EV_SAI :
 
+        trata_evento_sai(w, ev) ;
         destroi_evento(ev) ;
         break ;
 
       case EV_VIAJA :
 
+        //trata_evento_viaja(w, &w->Heroes[ev->dado1], &w->Bases[ev->dado2]) ;
         destroi_evento(ev) ;
         break ;
 
