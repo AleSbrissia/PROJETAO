@@ -273,7 +273,6 @@ void lista_imprime (char *nome, lista_t* lst) {
   }
 
   printf("]") ;
-  printf(" (%d elementos)\n", lst->size) ;
 }
 
 
