@@ -42,6 +42,8 @@ struct world_t {
   struct miss_t *Miss ;
   int NSkills ;
   int WSize ;
+  int cont ;
+  int try ;
   struct lef_t *lef ;
   int clock ;
 } ;
@@ -53,7 +55,6 @@ struct base_t {
   struct set_t *party ;
   struct set_t *skills ;
   lista_t *wait ;
-  //int NHeroes ;
   int cx ;
   int cy ;
 } ;
@@ -174,6 +175,8 @@ struct world_t *world_create (int tstart, int wsize, int nskills,int nheroes,
   w->WSize = wsize ;
   w->clock = tstart ;
   w->lef = cria_lef() ;
+  w->cont = 0 ; 
+  w->try = nmiss ; //no mínimo um agendamento por missao
 
   //seta os vetores 
   w->Heroes = Heroes_create(nheroes, nskills) ;
@@ -245,6 +248,7 @@ int world_start (struct world_t *w, long tend) {
 int trata_evento_fim (struct world_t *w, struct evento_t *end) {
 
   int i ;
+  float med, tent ;
 
   if (!w || !w->Heroes) 
     return 0 ;
@@ -260,8 +264,12 @@ int trata_evento_fim (struct world_t *w, struct evento_t *end) {
     printf("\n") ;
   }  
 
-  //terminar 
-  printf("/ MISSOES CUMPRIDAS (2f), MEDIA 2f TENTATIVAS/MISSAO\n") ;
+  med = w->cont / w->NMiss  ;
+  printf("%f\n", med) ;
+  tent = w->try / w->NMiss ;
+
+  printf("%d/%d MISSOES CUMPRIDAS (%.2f%%), MEDIA %.2f TENTATIVAS/MISSAO\n",
+         w->cont, w->NMiss, med, tent ) ;
 
   return 1 ;
 } 
@@ -378,8 +386,10 @@ int trata_evento_entra (struct world_t *w, struct hero_t *h, struct base_t *b) {
 
   r = aleat(1, 20) ;
   tpb = 15 + (h->patience * r) ;
-  printf("%6d: ENTRA  HEROI %2d BASE %d (%2d/%2d) SAI %d\n", w->clock, h->id,
-         b->id, set_card(b->party), b->size, tpb) ;
+  printf("%6d: ENTRA  HEROI %2d BASE %d (%2d/%2d) SAI %d", w->clock, h->id,
+         b->id, set_card(b->party), b->size, tpb + w->clock ) ;
+  set_print(b->skills) ;
+  printf("\n") ;
   ev = cria_evento(w->clock +tpb, EV_SAI, h->id, b->id) ;
   insere_lef(w->lef, ev) ;
 
@@ -402,10 +412,12 @@ int trata_evento_sai (struct world_t *w, struct evento_t *sai) {
   d2 = sai->dado2 ;
 
   set_del(b->party, h->id) ;
-  set_intersect(b->skills, h->Skills, b->skills) ;
 
-  j = 0 ;
+  for (i = 0 ; i < w->NHeroes -1 ; i++) 
+    set_del(b->skills, i) ;
+
   i = 0 ;
+  j = 0 ;
   // laço para refazer o conj habilidades da base
   while (set_card(b->party) > i ) {
   
@@ -423,8 +435,10 @@ int trata_evento_sai (struct world_t *w, struct evento_t *sai) {
   insere_lef(w->lef, ev) ;
   ev = cria_evento(w->clock, EV_AVISA, 0, d2) ; 
   insere_lef(w->lef, ev) ;
-  printf("%6d: SAI    HEROI %2d BASE %d (%2d/%2d)\n", w->clock, d1, d2, 
+  printf("%6d: SAI    HEROI %2d BASE %d (%2d/%2d)", w->clock, d1, d2, 
          set_card(w->Bases[d2].party), b->size) ;
+  set_print(b->skills) ;
+  printf("\n") ;
 
   return 1 ;
 }
@@ -492,6 +506,7 @@ int trata_evento_missao (struct world_t *w, struct evento_t *ev) {
     ad = cria_evento(ev->tempo + 24 * 60, EV_MISSAO, ev->dado1, 0) ;
     insere_lef(w->lef, ad) ;
     printf("%6d: MISSAO %4d IMPOSSIVEL\n", w->clock, m->id);
+    w->try++ ;
 
     return 1 ;
   }
@@ -504,6 +519,7 @@ int trata_evento_missao (struct world_t *w, struct evento_t *ev) {
   printf("%6d: MISSAO %4d CUMPRIDA BASE %d HEROIS:", w->clock, m->id, b->id) ; 
   set_print(b->party) ;
   printf("\n") ;
+  w->cont++ ;
   
   return 1 ;
 }
@@ -536,13 +552,13 @@ void imprime_t (struct world_t *w) { //FUNCAO PARA TESTE
     lista_imprime(&n, w->Bases[i].wait) ;
   }
 
-  /*printf("Missoes: \n") ;
+  printf("Missoes: \n") ;
   for (i = 0; i < N_MISSOES; i++) {
     
     printf("id %d, cx %d, cy %d ", w->Miss[i].id, w->Miss[i].cx,w->Miss[i].cy) ;
     set_print(w->Miss[i].skills) ;
     printf("\n") ;
-  } */
+  } 
 }
 
 // programa principal
@@ -552,7 +568,7 @@ int main () {
   struct evento_t *ev ;
 
   // iniciar o mundo
-  srand(0) ;
+  srand(1) ;
 
   w = world_create(T_INICIO, N_TAMANHO_MUNDO, N_HABILIDADES, N_HEROIS,
                    N_BASES, N_MISSOES) ;
@@ -627,6 +643,7 @@ int main () {
 
 
   } 
+  //imprime_t(w) ;
 
   // destruir o mundo
   w = world_destroy(w) ;
