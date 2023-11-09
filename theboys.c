@@ -101,7 +101,7 @@ struct hero_t *Heroes_create (int nheroes, int nskills) {
 
     //laço para evitar repetiçoes nas habilidades
     while( set_card(h[i].Skills) < tam) 
-      set_add (h[i].Skills, aleat(0, 9)) ;
+      set_add (h[i].Skills, aleat(0, nskills -1)) ;
 
     h[i].id = i ; 
     h[i].patience = aleat(0, 100) ;  
@@ -264,7 +264,7 @@ int trata_evento_fim (struct world_t *w, struct evento_t *end) {
     printf("\n") ;
   }  
 
-  med = w->cont / w->NMiss  ;
+  med = (float) w->cont / w->NMiss  ;
   printf("%f\n", med) ;
   tent = w->try / w->NMiss ;
 
@@ -491,11 +491,10 @@ int trata_evento_missao (struct world_t *w, struct evento_t *ev) {
     if (dis > d) {
 
       dis = d ;
+      printf("%6d: MISSAO %4d HAB BASE %d:", w->clock, m->id, b->id) ;
+      set_print(b->skills) ;
+      printf("\n") ;
       if ( set_contains(b->skills, m->skills)) {
-
-        printf("%6d: MISSAO %4d HAB BASE %d:", w->clock, m->id, b->id) ;
-        set_print(b->skills) ;
-        printf("\n") ;
         bmp = i ;
       }
     }
@@ -569,7 +568,7 @@ int main () {
   struct evento_t *ev ;
 
   // iniciar o mundo
-  srand(1) ;
+  srand(0) ;
 
   w = world_create(T_INICIO, N_TAMANHO_MUNDO, N_HABILIDADES, N_HEROIS,
                    N_BASES, N_MISSOES) ;
