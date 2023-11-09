@@ -512,9 +512,10 @@ int trata_evento_missao (struct world_t *w, struct evento_t *ev) {
   }
 
   b = &w->Bases[bmp] ;
-  for ( i = 0 ; i < w->NHeroes -1 ; i++)
+  for ( i = 0 ; i < w->NHeroes ; i++) 
     if ( set_in(b->party, i)) 
       w->Heroes[i].xp++ ;
+  
     
   printf("%6d: MISSAO %4d CUMPRIDA BASE %d HEROIS:", w->clock, m->id, b->id) ; 
   set_print(b->party) ;
