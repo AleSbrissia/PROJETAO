@@ -256,7 +256,6 @@ void set_print (struct set_t *s) {
       printf("%d ", i) ;
   printf("] ") ;
   
-  printf("(%d items)\n", s->num) ;
 }
 
 
