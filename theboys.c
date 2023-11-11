@@ -101,7 +101,7 @@ struct hero_t *Heroes_create (int nheroes, int nskills) {
 
     //laço para evitar repetiçoes nas habilidades
     while( set_card(h[i].Skills) < tam) 
-      set_add (h[i].Skills, aleat(0, nskills -1)) ;
+      set_add (h[i].Skills, aleat(0, 9)) ;
 
     h[i].id = i ; 
     h[i].patience = aleat(0, 100) ;  
@@ -264,9 +264,8 @@ int trata_evento_fim (struct world_t *w, struct evento_t *end) {
     printf("\n") ;
   }  
 
-  med = (float) w->cont / w->NMiss  ;
-  printf("%f\n", med) ;
-  tent = w->try / w->NMiss ;
+  med = (float) w->cont / w->NMiss * 100 ;
+  tent = (float) w->try / w->NMiss ;
 
   printf("%d/%d MISSOES CUMPRIDAS (%.2f%%), MEDIA %.2f TENTATIVAS/MISSAO\n",
          w->cont, w->NMiss, med, tent ) ;
@@ -437,7 +436,6 @@ int trata_evento_sai (struct world_t *w, struct evento_t *sai) {
   insere_lef(w->lef, ev) ;
   printf("%6d: SAI    HEROI %2d BASE %d (%2d/%2d)", w->clock, d1, d2, 
          set_card(w->Bases[d2].party), b->size) ;
-  set_print(b->skills) ;
   printf("\n") ;
 
   return 1 ;
@@ -467,39 +465,70 @@ int trata_evento_viaja (struct world_t *w, struct hero_t *h, struct base_t *b) {
 
 int trata_evento_missao (struct world_t *w, struct evento_t *ev) {
 
-  int dis, d, i, bmp ;
+  int d1, d2, i, j, bmp, aux, *v ;
   struct evento_t *ad ;
   struct miss_t *m ;
-  struct base_t *b ;
+  struct base_t *b1, *b2 ;
 
   if (!w || !ev) 
     return 0 ;
 
+  v = malloc (sizeof(int) * w->NBases) ; //alocando um vetor de prioridade
+  if (!v)
+    return 0 ;
+
+  for ( i = 0 ; i < w->NBases ; i++) 
+    v[i] = i ; 
+
   m = &w->Miss[ev->dado1] ;
-  dis = 2 * N_TAMANHO_MUNDO ; //inicializa dis fora do mapa
+  //dis = 2 * N_TAMANHO_MUNDO ; //inicializa dis fora do mapa
   bmp = -1 ;
   
   printf("%6d: MISSAO %4d HAB REQ:", w->clock, m->id) ;
   set_print(m->skills) ;
   printf("\n") ;
 
-  for (i = 0 ; i < w->NBases -1 ; i++) {
+  for (i = 0 ; i < w->NBases ; i++) {
 
-    b = &w->Bases[i] ;
-    d = sqrt((m->cx - b->cx)*(m->cx - b->cx) + (m->cy - b->cy)*(m->cy - b->cy)) ;
+    b1 = &w->Bases[v[i]] ;
+    d1 = sqrt(pow(m->cx - b1->cx, 2) + pow(m->cy - b1->cy, 2)) ;
+    printf("MISSAO b %d dis %d\n", i, d1) ;
+  }
 
-    if (dis > d) {
+  /*Ordena o vetor de bases por distancia da missao*/
+  for (i = 0 ; i < w->NBases ; i++) {
 
-      dis = d ;
-      printf("%6d: MISSAO %4d HAB BASE %d:", w->clock, m->id, b->id) ;
-      set_print(b->skills) ;
-      printf("\n") ;
-      if ( set_contains(b->skills, m->skills)) {
-        bmp = i ;
+    b1 = &w->Bases[v[i]] ;
+    d1 = sqrt(pow(m->cx - b1->cx, 2) + pow(m->cy - b1->cy, 2)) ;
+    
+    for (j = 0 ; j < w->NBases ; j++) {
+
+      b2 = &w->Bases[v[j]] ;
+      d2 = sqrt(pow(m->cx - b2->cx, 2) + pow(m->cy - b2->cy, 2)) ;
+
+      if (d2 > d1) {
+
+        aux = v[i] ;
+        v[i] = v[j] ;
+        v[j] = aux ;
       }
     }
-  }  
+  }
+
+  for (i = 0 ; i < w->NBases ; i++) {
   
+    b1 = &w->Bases[v[i]] ;
+    printf("%6d: MISSAO %4d HAB BASE %d:", w->clock, m->id, b1->id) ;
+    set_print(b1->skills) ;
+    printf("\n") ;
+
+    if (set_contains(b1->skills, m->skills)) {
+
+      bmp = i ;
+      break ;
+    }
+  }
+
   if (bmp == -1) {
 
     ad = cria_evento(ev->tempo + 24 * 60, EV_MISSAO, ev->dado1, 0) ;
@@ -510,17 +539,18 @@ int trata_evento_missao (struct world_t *w, struct evento_t *ev) {
     return 1 ;
   }
 
-  b = &w->Bases[bmp] ;
   for ( i = 0 ; i < w->NHeroes ; i++) 
-    if ( set_in(b->party, i)) 
+    if ( set_in(b1->party, i)) 
       w->Heroes[i].xp++ ;
   
     
-  printf("%6d: MISSAO %4d CUMPRIDA BASE %d HEROIS:", w->clock, m->id, b->id) ; 
-  set_print(b->party) ;
+  printf("%6d: MISSAO %4d CUMPRIDA BASE %d HEROIS:", w->clock, m->id, b1->id) ; 
+  set_print(b1->party) ;
   printf("\n") ;
   w->cont++ ;
   
+  free(v) ;
+
   return 1 ;
 }
 
@@ -555,7 +585,7 @@ void imprime_t (struct world_t *w) { //FUNCAO PARA TESTE
   printf("Missoes: \n") ;
   for (i = 0; i < N_MISSOES; i++) {
     
-    printf("id %d, cx %d, cy %d ", w->Miss[i].id, w->Miss[i].cx,w->Miss[i].cy) ;
+    printf("MISSAO id %d, cx %d, cy %d ", w->Miss[i].id, w->Miss[i].cx,w->Miss[i].cy) ;
     set_print(w->Miss[i].skills) ;
     printf("\n") ;
   } 
@@ -568,7 +598,7 @@ int main () {
   struct evento_t *ev ;
 
   // iniciar o mundo
-  srand(0) ;
+  srand(1) ;
 
   w = world_create(T_INICIO, N_TAMANHO_MUNDO, N_HABILIDADES, N_HEROIS,
                    N_BASES, N_MISSOES) ;
@@ -643,7 +673,7 @@ int main () {
 
 
   } 
-  //imprime_t(w) ;
+  imprime_t(w) ;
 
   // destruir o mundo
   w = world_destroy(w) ;
