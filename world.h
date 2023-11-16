@@ -3,7 +3,6 @@
 
 // seus #includes vão aqui
 #include <stdio.h>
-#include "ev.h"
 #include "set.h"
 #include "lista.h"
 #include "lef.h"
@@ -19,8 +18,9 @@ struct world_t {
   int NSkills ;
   int WSize ;
   int cont ;
-  int try ;
+  int tr ;
   struct lef_t *lef ;
+  int EndTime ;
   int clock ;
 } ;
 
@@ -55,20 +55,30 @@ struct miss_t {
 
 int aleat(int min, int max) ;
 
-struct world_t *world_create (int tstart, int wsize, int nskills,int nheroes,
-                              int nbases, long nmiss) ;
+struct world_t *world_create (int tstart, int wsize, int nskills, int nheroes,
+                              int nbases, int nmiss, int endtime) ;  
 
-struct world_t *world_destroy (struct world_t *w) ;
+struct world_t *world_destroy (struct world_t *w) ; 
 
-// coloca os eventos iniciais
 int world_start (struct world_t *w, long tend) ;
 
 void world_loop (struct world_t *w) ;
 
-//funcao para testes
-void imprime_t (struct world_t *w) ;
+int trata_evento_fim (struct world_t *w, struct evento_t *end) ;
 
+int trata_evento_chega(struct world_t *w, struct evento_t *ch) ;
 
+int trata_evento_espera(struct world_t *w, struct hero_t *h, struct base_t *b) ;
 
+int trata_evento_desiste(struct world_t *w, struct evento_t *des) ;
 
+int trata_evento_avisa(struct world_t *w, struct base_t *b) ;
+
+int trata_evento_entra (struct world_t *w, struct hero_t *h, struct base_t *b) ;
+
+int trata_evento_sai (struct world_t *w, struct evento_t *sai) ;
+
+int trata_evento_viaja (struct world_t *w, struct hero_t *h, struct base_t *b) ;
+
+int trata_evento_missao (struct world_t *w, struct evento_t *ev) ;
 
