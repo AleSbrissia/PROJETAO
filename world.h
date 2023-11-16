@@ -1,7 +1,7 @@
 // programa principal do projeto "The Boys - 2023"
 // Autor: Alexandre Sbrissia, GRR: 20231955
 
-// seus #includes vão aqui
+// seus #includes vão aquivim 
 #include <stdio.h>
 #include "set.h"
 #include "lista.h"
@@ -60,7 +60,7 @@ struct world_t *world_create (int tstart, int wsize, int nskills, int nheroes,
 
 struct world_t *world_destroy (struct world_t *w) ; 
 
-int world_start (struct world_t *w, long tend) ;
+int world_start (struct world_t *w) ;
 
 void world_loop (struct world_t *w) ;
 

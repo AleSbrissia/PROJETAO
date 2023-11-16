@@ -162,7 +162,7 @@ struct world_t *world_destroy (struct world_t *w) {
   return NULL ;
 }
 
-int world_start (struct world_t *w, long tend) {
+int world_start (struct world_t *w) {
 
   int i ;
   struct evento_t *ev ;
@@ -179,11 +179,11 @@ int world_start (struct world_t *w, long tend) {
 
   for (i = 0; i < w->NMiss; i++) {
     
-    ev = cria_evento (aleat(0 , tend), 8, w->Miss[i].id, 0) ; //d2 nao precisa
+    ev = cria_evento (aleat(0 , w->EndTime), 8, w->Miss[i].id, 0) ; //d2 nao precisa
     insere_lef (w->lef, ev) ;
   }
   
-  ev = cria_evento (tend, 9, 0, 0) ;
+  ev = cria_evento (w->EndTime, EV_FIM, 0, 0) ;
   insere_lef (w->lef, ev) ;
 
   return 1 ;
@@ -246,7 +246,7 @@ int trata_evento_chega(struct world_t *w, struct evento_t *ch) {
   }
   else {
   
-    ev = cria_evento(w->clock +1, EV_DESISTE, w->Heroes[d1].id,
+    ev = cria_evento(w->clock , EV_DESISTE, w->Heroes[d1].id,
                        w->Bases[d2].id) ;
     printf("%6d: CHEGA  HEROI %2d BASE %d (%2d/%2d) DESISTE\n", w->clock,
            w->Heroes[d1].id, w->Bases[d2].id, set_card(w->Bases[d2].party),
@@ -431,13 +431,6 @@ int trata_evento_missao (struct world_t *w, struct evento_t *ev) {
   set_print(m->skills) ;
   printf("\n") ;
 
-  /* for (i = 0 ; i < w->NBases ; i++) {
-
-    b1 = &w->Bases[v[i]] ;
-    d1 = sqrt(pow(m->cx - b1->cx, 2) + pow(m->cy - b1->cy, 2)) ;
-    printf("MISSAO b %d dis %d\n", i, d1) ;
-  } */
-
   /*Ordena o vetor de bases por distancia da missao*/
   for (i = 0 ; i < w->NBases ; i++) {
 
@@ -550,47 +543,38 @@ void world_loop (struct world_t *w) {
     switch (ev->tipo) {
 
       case EV_CHEGA :
-       
         trata_evento_chega(w, ev) ;
         break ;
 
       case EV_ESPERA :
-
         trata_evento_espera(w, &w->Heroes[ev->dado1], &w->Bases[ev->dado2]) ;
         break ;
 
       case EV_DESISTE :
-
         trata_evento_desiste(w, ev) ;
         break ;
 
       case EV_AVISA :
-
         trata_evento_avisa(w, &w->Bases[ev->dado2]) ;
         break ;
 
       case EV_ENTRA :
-
         trata_evento_entra(w, &w->Heroes[ev->dado1], &w->Bases[ev->dado2]) ;
         break ;
 
       case EV_SAI :
-
         trata_evento_sai(w, ev) ;
         break ;
 
       case EV_VIAJA :
-
         trata_evento_viaja(w, &w->Heroes[ev->dado1], &w->Bases[ev->dado2]) ;
         break ;
 
       case EV_MISSAO :
-
         trata_evento_missao(w, ev) ;
         break ;
 
       case EV_FIM :
-        
         trata_evento_fim(w, ev) ;
         break ;
     }
