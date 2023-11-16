@@ -9,13 +9,14 @@ ENTREGA = $(MAIN)-entrega
 TESTES  = testa-lef
 
 # programa principal
-$(MAIN):   $(MAIN).o lef.o lista.o set.o
-$(MAIN).o: $(MAIN).c lef.h lista.h set.h
+$(MAIN):   $(MAIN).o lef.o lista.o set.o world.o
+$(MAIN).o: $(MAIN).c lef.h lista.h set.h world.c
 
 # TADs
 lef.o:   lef.c   lef.h
 lista.o: lista.c lista.h
 set.o:   set.c   set.h
+world.o: world.c world.c
 
 # Teste da LEF
 testa-lef:    testa-lef.o  lef.o
