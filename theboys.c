@@ -6,11 +6,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
-#include <assert.h>
 #include "set.h"
 #include "lista.h"
 #include "lef.h"
 #include "world.h"
+#include "ev.h"
 
 // defines no mundo:
 #define T_INICIO 0
@@ -31,8 +31,8 @@ int main () {
 
   w = world_create(T_INICIO, N_TAMANHO_MUNDO, N_HABILIDADES, N_HEROIS,
                    N_BASES, N_MISSOES, T_FIM_DO_MUNDO) ;
-  world_start(w) ;
-  
+  world_start(w, T_FIM_DO_MUNDO) ;
+
   // executar o laço de simulação
   world_loop(w) ;
 
