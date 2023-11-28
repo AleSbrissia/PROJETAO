@@ -4,13 +4,7 @@
 // seus #includes vão aqui
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <math.h>
-#include "set.h"
-#include "lista.h"
-#include "lef.h"
 #include "world.h"
-#include "ev.h"
 
 // defines no mundo:
 #define T_INICIO 0
@@ -41,6 +35,4 @@ int main () {
 
   return 0 ;
 }
-
-
 
