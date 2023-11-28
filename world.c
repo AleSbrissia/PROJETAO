@@ -10,6 +10,7 @@
 #include "lista.h"
 #include "lef.h"
 #include "world.h"
+#include "ev.h"
 
 // defines de eventos 
 #define EV_CHEGA 1

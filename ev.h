@@ -1,11 +1,17 @@
 // Biblioteca de eventos do projeto "The Boys - 2023"
 // Autor: Alexandre Sbrissia, GRR: 20231955
 
-#include <stdio.h>
-#include "set.h"
-#include "lista.h"
-#include "lef.h"
+#ifndef _EV_H
+#define _EV_H
+
 #include "world.h"
+
+struct dist_t {
+
+  int id ;
+  int d ;
+} ;
+
 
 int trata_evento_fim (struct world_t *w, struct evento_t *end) ;
 
@@ -25,3 +31,4 @@ int trata_evento_viaja (struct world_t *w, struct hero_t *h, struct base_t *b) ;
 
 int trata_evento_missao (struct world_t *w, struct evento_t *ev) ;
 
+#endif
