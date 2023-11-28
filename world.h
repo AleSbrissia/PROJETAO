@@ -4,7 +4,6 @@
 #ifndef _WORLD_H
 #define _WORLD_H
 
-
 // seus #includes vão aqui
 #include <stdio.h>
 #include "set.h"
@@ -59,13 +58,17 @@ struct miss_t {
 
 int aleat(int min, int max) ;
 
+/*aloca o mundo e seta as variaveis de acordo com os defines*/
 struct world_t *world_create (int tstart, int wsize, int nskills, int nheroes,
                               int nbases, int nmiss, int endtime) ;  
 
 struct world_t *world_destroy (struct world_t *w) ; 
 
+/*eventos iniciais do mundo
+  retorna 0 em caso de erro e 1 em sucesso*/
 int world_start (struct world_t *w, long tend) ;
 
+/*laço de simulacao do mundo*/
 void world_loop (struct world_t *w) ;
 
 #endif

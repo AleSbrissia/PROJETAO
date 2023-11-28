@@ -28,7 +28,8 @@ int aleat(int min, int max) {
   return rand() % (max - min + 1) + min;
 }
 
-//funcao exclusiva deste arquivo
+/*funcao exclusiva deste arquivo
+ aloca um vetor de herois e inicializa os conjuntos*/  
 struct hero_t *Heroes_create (int nheroes, int nskills) {
 
   int i, tam ;
@@ -56,7 +57,8 @@ struct hero_t *Heroes_create (int nheroes, int nskills) {
   return h ;
 }
 
-//funcao exclusiva deste arquivo
+/*funcao exclusiva deste arquivo
+ aloca um vetor de bases e inicializa os conjuntos*/  
 struct base_t *Bases_create (int wsize, int nheroes, int nbases, int nskills) {
 
   int i ;
@@ -79,8 +81,8 @@ struct base_t *Bases_create (int wsize, int nheroes, int nbases, int nskills) {
   return b ; 
 }
 
-// funcao exclusiva deste arquivo
-// aloca um vetor de missoes e inicializa os conjuntos de habilidades
+/* funcao exclusiva deste arquivo
+ aloca um vetor de missoes e inicializa os conjuntos*/
 struct miss_t *Miss_create (int nmiss, int wsize, int nskills) {
 
   int i, tam ;
@@ -98,7 +100,7 @@ struct miss_t *Miss_create (int nmiss, int wsize, int nskills) {
     m[i].skills = set_create(nskills) ;
     tam = aleat(6, 10) ;
 
-    //laço para evitar repetiçoes nas habilidades
+    /*laço para evitar repetiçoes nas habilidades*/
     while( set_card(m[i].skills) < tam) 
       set_add (m[i].skills, aleat(0, 9)) ;
 
@@ -106,6 +108,7 @@ struct miss_t *Miss_create (int nmiss, int wsize, int nskills) {
   return m ;
 }
 
+/*aloca o mundo e seta as variaveis de acordo com os defines */
 struct world_t *world_create (int tstart, int wsize, int nskills,int nheroes,
                               int nbases, int nmiss, int endtime) {
 
@@ -123,7 +126,7 @@ struct world_t *world_create (int tstart, int wsize, int nskills,int nheroes,
   w->cont = 0 ; 
   w->tr = nmiss ; //no mínimo um agendamento por missao
 
-  //seta os vetores 
+  /*seta os vetores*/
   w->Heroes = Heroes_create(nheroes, nskills) ;
   w->Bases = Bases_create(wsize, nheroes, nbases, nskills) ;
   w->Miss = Miss_create(nmiss, wsize, nskills) ;
@@ -163,6 +166,8 @@ struct world_t *world_destroy (struct world_t *w) {
   return NULL ;
 }
 
+/*eventos iniciais do mundo
+  retorna 0 em caso de erro e 1 em sucesso*/
 int world_start (struct world_t *w, long tend) {
 
   int i ;
@@ -171,6 +176,7 @@ int world_start (struct world_t *w, long tend) {
   if (!w || !w->Heroes || !w->Miss || !w->Bases) 
     return 0 ;
 
+  /*inicializa os herois*/
   for (i = 0; i < w->NHeroes; i++) {
     
     w->Heroes[i].BaseId = aleat(0, w->NBases -1) ;
@@ -178,6 +184,7 @@ int world_start (struct world_t *w, long tend) {
     insere_lef(w->lef, ev) ;
   }
 
+  /*inicializa as missoes*/
   for (i = 0; i < w->NMiss; i++) {
     
     ev = cria_evento (aleat(0 , tend), 8, w->Miss[i].id, 0) ; //d2 nao precisa
@@ -190,42 +197,7 @@ int world_start (struct world_t *w, long tend) {
   return 1 ;
 }
 
-void imprime_t (struct world_t *w) { //FUNCAO PARA TESTE
-
-  int i ;
-  char n ;
-
-  n = 'W' ;
-
-  printf("HEROIS\n") ;
-  for (i = 0; i < w->NHeroes; i++) {
-    
-    printf("id %2d, pac %3d, spe %4d, Bid %d ", w->Heroes[i].id,
-            w->Heroes[i].patience, w->Heroes[i].speed, w->Heroes[i].BaseId) ;
-    set_print(w->Heroes[i].Skills) ;
-    printf("\n") ;
-  }
-
-  printf("BASES:\n") ;
-  for (i = 0; i < w->NBases ; i++) {
-    
-    printf("id %d, size %2d, cx %5d, cy %5d ", w->Bases[i].id,
-          w->Bases[i].size, w->Bases[i].cx, w->Bases[i].cy) ; 
-
-    set_print(w->Bases[i].party) ;
-    set_print(w->Bases[i].skills) ;
-    lista_imprime(&n, w->Bases[i].wait) ;
-  }
-
-  printf("Missoes: \n") ;
-  for (i = 0; i < w->NMiss ; i++) {
-    
-    printf("MISSAO id %d, cx %d, cy %d ", w->Miss[i].id, w->Miss[i].cx,w->Miss[i].cy) ;
-    set_print(w->Miss[i].skills) ;
-    printf("\n") ;
-  } 
-}
-
+/*laço de simulacao do mundo*/
 void world_loop (struct world_t *w) {
 
   struct evento_t *ev ;
@@ -241,47 +213,38 @@ void world_loop (struct world_t *w) {
     switch (ev->tipo) {
 
       case EV_CHEGA :
-       
         trata_evento_chega(w, ev) ;
         break ;
 
       case EV_ESPERA :
-
         trata_evento_espera(w, &w->Heroes[ev->dado1], &w->Bases[ev->dado2]) ;
         break ;
 
       case EV_DESISTE :
-
         trata_evento_desiste(w, ev) ;
         break ;
 
       case EV_AVISA :
-
         trata_evento_avisa(w, &w->Bases[ev->dado2]) ;
         break ;
 
       case EV_ENTRA :
-
         trata_evento_entra(w, &w->Heroes[ev->dado1], &w->Bases[ev->dado2]) ;
         break ;
 
       case EV_SAI :
-
         trata_evento_sai(w, ev) ;
         break ;
 
       case EV_VIAJA :
-
         trata_evento_viaja(w, &w->Heroes[ev->dado1], &w->Bases[ev->dado2]) ;
         break ;
 
       case EV_MISSAO :
-
         trata_evento_missao(w, ev) ;
         break ;
 
       case EV_FIM :
-        
         trata_evento_fim(w, ev) ;
         break ;
     }

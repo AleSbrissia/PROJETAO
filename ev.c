@@ -42,6 +42,7 @@ int trata_evento_fim (struct world_t *w, struct evento_t *end) {
     printf("\n") ;
   }  
 
+  /*calcula as medias de tentativas e de missoes cumpridas */
   med = (float) w->cont / w->NMiss * 100 ;
   tent = (float) w->tr / w->NMiss ;
 
@@ -51,6 +52,7 @@ int trata_evento_fim (struct world_t *w, struct evento_t *end) {
   return 1 ;
 } 
 
+/*retorna 1 em sucesso e 0 em caso de falha*/
 int trata_evento_chega(struct world_t *w, struct evento_t *ch) {
 
   struct evento_t *ev ;
@@ -90,6 +92,7 @@ int trata_evento_chega(struct world_t *w, struct evento_t *ch) {
   return 1 ;
 }
 
+/*retorna 1 em sucesso e 0 em caso de falha*/
 int trata_evento_espera(struct world_t *w, struct hero_t *h, struct base_t *b) {
 
   struct evento_t *ev ;
@@ -107,6 +110,7 @@ int trata_evento_espera(struct world_t *w, struct hero_t *h, struct base_t *b) {
   return 1 ;
 }
 
+/*retorna 1 em sucesso e 0 em caso de falha*/
 int trata_evento_desiste(struct world_t *w, struct evento_t *des) {
 
   int d1, d2, b ;
@@ -126,6 +130,7 @@ int trata_evento_desiste(struct world_t *w, struct evento_t *des) {
   return 1 ;
 }
 
+/*retorna 1 em sucesso e 0 em caso de falha*/
 int trata_evento_avisa(struct world_t *w, struct base_t *b) {
   
   int i ;
@@ -157,6 +162,7 @@ int trata_evento_avisa(struct world_t *w, struct base_t *b) {
   return 1 ;
 }
 
+/*retorna 1 em sucesso e 0 em caso de falha*/
 int trata_evento_entra (struct world_t *w, struct hero_t *h, struct base_t *b) {
 
   int tpb, r, t ;
@@ -179,6 +185,7 @@ int trata_evento_entra (struct world_t *w, struct hero_t *h, struct base_t *b) {
   return 1 ;
 }
 
+/*retorna 1 em sucesso e 0 em caso de falha*/
 int trata_evento_sai (struct world_t *w, struct evento_t *sai) {
 
   int i, j, d1, d2 ;
@@ -205,7 +212,7 @@ int trata_evento_sai (struct world_t *w, struct evento_t *sai) {
   /*refaz o conj habilidades da base*/
   while (set_card(b->party) > i ) {
   
-    for (j = j ; j < w->NHeroes; j++ )    {
+    for (j = j ; j < w->NHeroes; j++) {
      
       if (set_in(b->party, j)) {
 
@@ -226,6 +233,7 @@ int trata_evento_sai (struct world_t *w, struct evento_t *sai) {
   return 1 ;
 }
 
+/*retorna 1 em sucesso e 0 em caso de falha*/
 int trata_evento_viaja (struct world_t *w, struct hero_t *h, struct base_t *b) {
 
   int ca, co, dur, dis, t ;
@@ -249,6 +257,7 @@ int trata_evento_viaja (struct world_t *w, struct hero_t *h, struct base_t *b) {
   return 1 ;
 }
 
+/*retorna 1 em sucesso e 0 em caso de falha*/
 int trata_evento_missao (struct world_t *w, struct evento_t *ev) {
 
   int i, j, bmp ;
@@ -281,18 +290,14 @@ int trata_evento_missao (struct world_t *w, struct evento_t *ev) {
   printf("\n") ;
 
   /*Ordena o vetor de bases por distancia da missao*/
-  for (i = 0 ; i < w->NBases -1 ; i++) {
-    
-    for (j = i ; j < w->NBases ; j++) {
-
+  for (i = 0 ; i < w->NBases -1 ; i++) 
+    for (j = i ; j < w->NBases ; j++) 
       if (v[i].d > v[j].d) {
 
         aux = v[i] ;
         v[i] = v[j] ;
         v[j] = aux ;
       }
-    }
-  }
 
   /*testa se as bases contem o set de habilidades da missao */
   for (i = 0 ; i < w->NBases ; i++) {
