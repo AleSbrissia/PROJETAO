@@ -1,4 +1,4 @@
-// programa principal do projeto "The Boys - 2023"
+// Biblioteca Mundo do projeto "The Boys - 2023"
 // Autor: Alexandre Sbrissia, GRR: 20231955
 
 #ifndef _WORLD_H
@@ -66,7 +66,7 @@ struct world_t *world_destroy (struct world_t *w) ;
 
 /*eventos iniciais do mundo
   retorna 0 em caso de erro e 1 em sucesso*/
-int world_start (struct world_t *w, long tend) ;
+int world_start (struct world_t *w) ;
 
 /*laço de simulacao do mundo*/
 void world_loop (struct world_t *w) ;

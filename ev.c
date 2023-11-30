@@ -1,4 +1,4 @@
-// programa principal do projeto "The Boys - 2023"
+// programa da Biblioteca de Eventos "The Boys - 2023"
 // Autor: Alexandre Sbrissia, GRR: 20231955
 
 // seus #includes vão aqui
@@ -28,7 +28,7 @@ int trata_evento_fim (struct world_t *w, struct evento_t *end) {
   int i ;
   float med, tent ;
 
-  if (!w || !w->Heroes) 
+  if (!w || !w->Heroes || !end) 
     return 0 ;
 
   printf("%d: FIM\n", end->tempo) ;
@@ -59,12 +59,12 @@ int trata_evento_chega(struct world_t *w, struct evento_t *ch) {
   bool espera ;
   int d1, d2 ;
 
-  if (!w || !w->lef || !w->Bases[ch->dado2].wait) 
+  if (!w || !w->lef || !w->Bases[ch->dado2].wait || !ch) 
     return 0 ; 
 
   d1 = ch->dado1 ;
   d2 = ch->dado2 ;
-  
+ 
   /*define se o heroi espera ou nao*/
   if (lista_vazia(w->Bases[d2].wait) && set_card(w->Bases[d2].party) <
       w->Bases[d2].size) 
@@ -210,18 +210,14 @@ int trata_evento_sai (struct world_t *w, struct evento_t *sai) {
   j = 0 ;
 
   /*refaz o conj habilidades da base*/
-  while (set_card(b->party) > i ) {
-  
-    for (j = j ; j < w->NHeroes; j++) {
-     
+  while (set_card(b->party) > i ) 
+    for (j = j ; j < w->NHeroes; j++) 
       if (set_in(b->party, j)) {
 
         set_union(b->skills, w->Heroes[j].Skills, b->skills) ;
         i++ ;
       }
-    }
-  }
-
+    
   ev = cria_evento(w->clock, EV_VIAJA, d1, aleat(0, w->NBases -1)) ;
   insere_lef(w->lef, ev) ;
   ev = cria_evento(w->clock, EV_AVISA, 0, d2) ; 

@@ -1,4 +1,4 @@
-// programa principal do projeto "The Boys - 2023"
+// programa da Biblioteca Mundo "The Boys - 2023"
 // Autor: Alexandre Sbrissia, GRR: 20231955
 
 // seus #includes vão aqui
@@ -168,7 +168,7 @@ struct world_t *world_destroy (struct world_t *w) {
 
 /*eventos iniciais do mundo
   retorna 0 em caso de erro e 1 em sucesso*/
-int world_start (struct world_t *w, long tend) {
+int world_start (struct world_t *w) {
 
   int i ;
   struct evento_t *ev ;
@@ -187,11 +187,11 @@ int world_start (struct world_t *w, long tend) {
   /*inicializa as missoes*/
   for (i = 0; i < w->NMiss; i++) {
     
-    ev = cria_evento (aleat(0 , tend), 8, w->Miss[i].id, 0) ; //d2 nao precisa
+    ev = cria_evento (aleat(0, w->EndTime), 8, w->Miss[i].id, 0) ; //d2 nao precisa
     insere_lef (w->lef, ev) ;
   }
   
-  ev = cria_evento (tend, 9, 0, 0) ;
+  ev = cria_evento (w->EndTime, 9, 0, 0) ;
   insere_lef (w->lef, ev) ;
 
   return 1 ;
@@ -201,11 +201,14 @@ int world_start (struct world_t *w, long tend) {
 void world_loop (struct world_t *w) {
 
   struct evento_t *ev ;
+	bool end_loop ;
 
   if (!w)
     return ;
 
-  while (w->clock < w->EndTime) {
+  end_loop = false ;
+
+  while (w->clock < w->EndTime && !end_loop) {
 
     ev = retira_lef(w->lef) ; 
     w->clock = ev->tempo ;
@@ -246,6 +249,7 @@ void world_loop (struct world_t *w) {
 
       case EV_FIM :
         trata_evento_fim(w, ev) ;
+				end_loop = true ;
         break ;
     }
     destroi_evento(ev) ; 
